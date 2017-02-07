@@ -1,3 +1,5 @@
+# Initial version
+
 library(ggplot2)
 library(lubridate)
 library(plyr)
@@ -31,8 +33,8 @@ head(sev.species)
 ##### Look at the formats of these files
 
 
-##Calculations  Now we need to calculate the different metrics of plant production. 
-##First we'll calculate "mean.volume," the average volumetric space (cm^3) that each species occupies per quadrat per season. 
+##Calculations  Now we need to calculate the different metrics of plant production.
+##First we'll calculate "mean.volume," the average volumetric space (cm^3) that each species occupies per quadrat per season.
 
 # Calculate the number of quads per site per season
 quads <- ddply(Ccover, c("year", "season", "date", "site"), function(x)
@@ -60,7 +62,7 @@ quads <- ddply(creosote, c("year", "site"), function(x)
 # Merge quadnum column
 creosote <- unique(merge(creosote, quads, c("year", "site"), all=T))
 
-# Find the species average of all NPP quadrats 
+# Find the species average of all NPP quadrats
 average <- unique(ddply(creosote, c("year", "site", "SpeciesCode"), function(x)
   data.frame(springnpp = sum(x$snpp, na.rm=TRUE)/x$quadnum,
              fallnpp = sum(x$fnpp, na.rm=TRUE)/x$quadnum,
@@ -96,12 +98,12 @@ all.sev.biomass <- merge(all.sev.biomass, sev.species, "SpeciesCode", all.x=T)
 
 head(all.sev.biomass)
 # Make a column of average-season dates which will help make prettier figures
-unique(month(all.sev.biomass$mean.date[all.sev.biomass$season==1])) 
+unique(month(all.sev.biomass$mean.date[all.sev.biomass$season==1]))
 all.sev.biomass$fakedate <- NA
 all.sev.biomass$fakedate[all.sev.biomass$season=="1"] <- 1
 all.sev.biomass$fakedate[all.sev.biomass$season=="2"] <- 366*(1/3)
 all.sev.biomass$fakedate[all.sev.biomass$season=="3"] <- 366*(2/3)
-all.sev.biomass$fakedate <- as.POSIXlt(strptime(paste(all.sev.biomass$fakedate, all.sev.biomass$year), format="%j %Y")) 
+all.sev.biomass$fakedate <- as.POSIXlt(strptime(paste(all.sev.biomass$fakedate, all.sev.biomass$year), format="%j %Y"))
 
 head(all.sev.biomass)
 
@@ -148,11 +150,11 @@ head(all.sev.biomass)
 all.sev.biomass <- unique(all.sev.biomass)
 all.sev.biomass$fakedate <- as.factor(as.character(all.sev.biomass$fakedate))
 PGseasonsummary <- ddply(unique(all.sev.biomass[,c("year", "season", "fakedate", "PlotGroup", "seasonalnpp", "mean.volume", "season.weight")]), c("year", "season", "fakedate", "PlotGroup"), function(x)
-  data.frame(seasonalnppPG = sum(x$seasonalnpp, na.rm=TRUE), 
+  data.frame(seasonalnppPG = sum(x$seasonalnpp, na.rm=TRUE),
              mean.volumePG = sum(x$mean.volume, na.rm=TRUE),
              season.weightPG = sum(x$season.weight, na.rm=TRUE)))
 PFTseasonsummary <- ddply(unique(all.sev.biomass[,c("year", "season", "fakedate", "PFT", "seasonalnpp", "mean.volume", "season.weight")]), c("year", "season", "fakedate", "PFT"), function(x)
-  data.frame(seasonalnppPFT = sum(x$seasonalnpp, na.rm=TRUE), 
+  data.frame(seasonalnppPFT = sum(x$seasonalnpp, na.rm=TRUE),
              mean.volumePFT = sum(x$mean.volume, na.rm=TRUE),
              season.weightPFT = sum(x$season.weight, na.rm=TRUE)))
 
@@ -175,16 +177,16 @@ PFTsummary <- PFTsummary[with(PFTsummary, order(fakedate, PFT)),]
 
 # Summary of C3 grass, C4 shrub/subshrub, and CAM contribution
 PFTsummary <- PFTsummary[!is.na(PFTsummary$PFT),]
-kable(PFTsummary[PFTsummary$PFT=="C3: grass" | 
-                   PFTsummary$PFT=="C4: shrub/subshrub" | 
+kable(PFTsummary[PFTsummary$PFT=="C3: grass" |
+                   PFTsummary$PFT=="C4: shrub/subshrub" |
                    PFTsummary$PFT=="CAM",
                  c("fakedate", "year", "season.precip", "PFT", "seasonalnppPFT", "annualnppPFT")],
       format="pandoc")
 # Now exclude these groups
-PFTsummary <- PFTsummary[PFTsummary$PFT!="C3: grass" & 
-                           PFTsummary$PFT!="C4: shrub/subshrub" & 
+PFTsummary <- PFTsummary[PFTsummary$PFT!="C3: grass" &
+                           PFTsummary$PFT!="C4: shrub/subshrub" &
                            PFTsummary$PFT!="CAM",]
-##Plots Now let's make some plots! These plots are all based on measurements of plant height and cover (Volume). Using species-specific regressions created by the Sev team (mostly Doug Moore), these measurements were converted into dry weights (Seasonal Weight). From these weights, seasonal increases in biomass (Seasonal NPP) were calculated. The sum of yearly seasonal biomass increases is presented as Annual NPP. I think only one or two of these metrics should be selected to create a coherent time series of plant production at the Sevilleta.  
+##Plots Now let's make some plots! These plots are all based on measurements of plant height and cover (Volume). Using species-specific regressions created by the Sev team (mostly Doug Moore), these measurements were converted into dry weights (Seasonal Weight). From these weights, seasonal increases in biomass (Seasonal NPP) were calculated. The sum of yearly seasonal biomass increases is presented as Annual NPP. I think only one or two of these metrics should be selected to create a coherent time series of plant production at the Sevilleta.
 
 #####Notes:  Creosote (LATR) biomass has been calculated in several different ways throughout time. No method seems entirely consistent, hence the variation in all creosote biomass metrics. I don't know how to correct for these changes. We might want to exclude some groups.
 
@@ -193,13 +195,13 @@ seasonalvolume.plot <- ggplot(PFTsummary[PFTsummary$season!=1,], aes(x = fakedat
   theme_bw() + scale_fill_brewer(palette = "Set1") +
   geom_bar(stat="identity", width=110) +
   theme(legend.position = "none", axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank()) +
-  xlab("Time") + ylab("Volume \n(cm^3/m^2)") 
+  xlab("Time") + ylab("Volume \n(cm^3/m^2)")
 
 seasonalweight.plot <- ggplot(PFTsummary[PFTsummary$season!=1,], aes(x = fakedate, y = season.weightPFT, group = PFT, fill = PFT)) +
   theme_bw() + scale_fill_brewer(palette = "Set1") +
   geom_bar(stat="identity", width=110) +
   theme(legend.position = "none", axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank()) +
-  xlab("Time") + ylab("Seasonal Weight \n(g/m^2)") 
+  xlab("Time") + ylab("Seasonal Weight \n(g/m^2)")
 
 seasonalbiomass.plot <- ggplot(PFTsummary[PFTsummary$season!=1,], aes(x = fakedate, y = seasonalnppPFT, group = PFT, fill = PFT)) +
   theme_bw() + scale_fill_brewer(palette = "Set1") +
@@ -211,7 +213,7 @@ annualbiomass.plot <- ggplot(PFTsummary[PFTsummary$season==3,], aes(x = fakedate
   theme_bw() + scale_fill_brewer(palette = "Set1") +
   geom_bar(stat="identity", width=240) +
   theme(legend.position = c(0.95, 0.65), legend.key.size = unit(0.7, "lines")) +
-  labs(fill = "PFT") + 
+  labs(fill = "PFT") +
   xlab("Time") + ylab("Annual NPP \n(g/m^2)")
 
 fourbiomassplots <- plot_grid(seasonalvolume.plot, seasonalweight.plot, seasonalbiomass.plot, annualbiomass.plot, align = 'v', ncol=1, rel_heights = c(1,1,1,1.2))
@@ -226,9 +228,9 @@ met.data <- met.data[met.data$Sta==49,]
 met.data <- unique(met.data[,c(1,2,4,10)])
 met.data$season <- as.factor(met.data$Month)
 met.data$season <- revalue(met.data$season, c(
-  "1" = "1", 
-  "2" = "2", "3" = "2", "4" = "2", "5" = "2", 
-  "6" = "3", "7" = "3", "8" = "3", "9" = "3", 
+  "1" = "1",
+  "2" = "2", "3" = "2", "4" = "2", "5" = "2",
+  "6" = "3", "7" = "3", "8" = "3", "9" = "3",
   "10" = "1", "11" = "1", "12" = "1"))
 colnames(met.data) <- c("mean.date", "month", "year", "Precip", "season")
 met.data[met.data==-999] <- NA
@@ -246,19 +248,19 @@ met.data$mean.date <- as.Date(as.POSIXlt(strptime(met.data$mean.date, format="%m
 met.data <- subset(met.data, year>=1998)
 
 # Make a column of average-season dates which will help make prettier figures
-unique(month(met.data$mean.date[met.data$season==1])) 
+unique(month(met.data$mean.date[met.data$season==1]))
 met.data$fakedate <- NA
 met.data$fakedate[met.data$season=="1"] <- 1
 met.data$fakedate[met.data$season=="2"] <- 366*(1/3)
 met.data$fakedate[met.data$season=="3"] <- 366*(2/3)
-met.data$fakedate <- as.Date(strptime(paste(met.data$fakedate, met.data$year), format="%j %Y")) 
+met.data$fakedate <- as.Date(strptime(paste(met.data$fakedate, met.data$year), format="%j %Y"))
 met.data$fakedate[met.data$month==10 | met.data$month==11 | met.data$month==12] <- met.data$fakedate[met.data$month==10 | met.data$month==11 | met.data$month==12] + years(1)
 
 # Sev trapping counts
 # all sev rodent data
 sev.trap <- read.csv("rodentdata2016_rodentdataall.csv", header=TRUE, strip.white=TRUE)
 sev.trap$season <- revalue(as.factor(sev.trap$season), c(
-  "1" = "2", 
+  "1" = "2",
   "2" = "2p5",
   "3" = "3"))
 sev.trap <- sev.trap[sev.trap$location=="5pgrass" | sev.trap$location=="5plarrea",]
@@ -269,12 +271,12 @@ trap.nights <- read.csv("rodentdata2016_weightedaverages.csv", header=TRUE, stri
 trap.nights <- trap.nights[,c("Year", "Season", "Black.Grama", "TrapNights")]
 colnames(trap.nights) <- c("year", "season", "location", "trapnights")
 trap.nights$season <- revalue(trap.nights$season, c(
-  "Fall" = "3", 
+  "Fall" = "3",
   "Fall*" = "3",
   "Spring" = "2",
   "Summer" = "2p5"))
 trap.nights$location <- revalue(trap.nights$location, c(
-  "5ptsgrass" = "5pgrass", 
+  "5ptsgrass" = "5pgrass",
   "5ptslarrea" = "5plarrea"))
 sev.trap <- merge(sev.trap, trap.nights, c("year", "season", "location"), all=T)
 
@@ -330,7 +332,7 @@ midpoint = mean(met.data$season.precip, na.rm=T)) +
 precip.plot
 
 
-#*Plot percent contribution each group**  
+#*Plot percent contribution each group**
  PFTweightpercent.plot <- ggplot(PFTsummary[!is.na(PFTsummary$PFT),], aes(x = fakedate, y = season.weightPFT, group = PFT, fill = PFT)) +
   theme_bw() + scale_fill_brewer(palette = "Set1") +
   geom_bar(stat="identity", position="fill", width=110) +
@@ -341,14 +343,14 @@ PFTnpppercent.plot <- ggplot(PFTsummary[!is.na(PFTsummary$PFT),], aes(x = fakeda
   theme_bw() + scale_fill_brewer(palette = "Set1") +
   geom_bar(stat="identity", position="fill", width=110) +
   theme(legend.position = c(0.95, 0.65), legend.key.size = unit(0.7, "lines")) +
-  labs(fill = "PFT") + 
-  xlab("Time") + ylab("Seasonal NPP \n(g/m^2)") 
+  labs(fill = "PFT") +
+  xlab("Time") + ylab("Seasonal NPP \n(g/m^2)")
 
 annualpercent.plot <- ggplot(PFTsummary[!is.na(PFTsummary$PFT) & PFTsummary$season==3,], aes(x = fakedate-days(60), y = annualnppPFT, group = PFT, fill = PFT)) +
   theme_bw() + scale_fill_brewer(palette = "Set1") +
   geom_bar(stat="identity", position="fill", width=240) +
   theme(legend.position = c(0.95, 0.65), legend.key.size = unit(0.7, "lines")) +
-  labs(fill = "PFT") + 
+  labs(fill = "PFT") +
   xlab("Time") + ylab("Annual NPP \n(g/m^2)")
 
 percentplots <- plot_grid(PFTweightpercent.plot, PFTnpppercent.plot, annualpercent.plot, align = 'v', ncol=1, rel_heights = c(1,1,1.2))
@@ -357,11 +359,11 @@ percentplots
 # Correlations with precip
 cor.plotPG <- ggplot(PGsummary, aes(x = season.precip, y = seasonalnppPG, group = PlotGroup, colour=PlotGroup)) + theme_bw() +
   scale_colour_brewer(palette = "Set2") +
-  geom_point(shape=1) + stat_smooth(method="lm") 
+  geom_point(shape=1) + stat_smooth(method="lm")
 
 cor.plotPFT <- ggplot(PFTsummary, aes(x = season.precip, y = seasonalnppPFT, group = PFT, colour=PFT)) + theme_bw() +
   scale_colour_brewer(palette = "Set1") +
-  geom_point(shape=2) + stat_smooth(method="lm") 
+  geom_point(shape=2) + stat_smooth(method="lm")
 
 grid.arrange(cor.plotPG, cor.plotPFT)
 
@@ -371,27 +373,27 @@ grid.arrange(cor.plotPG, cor.plotPFT)
 ycoordsPG <- data.frame(PGsummary[!is.na(PGsummary$PlotGroup) & PGsummary$season != "1", c("fakedate", "PlotGroup", "season.weightPG", "seasonalnppPG")])
 ycoordsPG$ymin <- NA
 ycoordsPG$ymin[ycoordsPG$PlotGroup == "C3sub"] <- 0
-ycoordsPG$ymin[ycoordsPG$PlotGroup == "C4"] <- 
+ycoordsPG$ymin[ycoordsPG$PlotGroup == "C4"] <-
 ycoordsPG$season.weightPG[ycoordsPG$PlotGroup == "C3sub"]
-ycoordsPG$ymin[ycoordsPG$PlotGroup == "CAM"] <- 
+ycoordsPG$ymin[ycoordsPG$PlotGroup == "CAM"] <-
 ycoordsPG$season.weightPG[ycoordsPG$PlotGroup == "C3sub"] +
 ycoordsPG$season.weightPG[ycoordsPG$PlotGroup == "C4"]
-ycoordsPG$ymin[ycoordsPG$PlotGroup == "LATR"] <- 
+ycoordsPG$ymin[ycoordsPG$PlotGroup == "LATR"] <-
 ycoordsPG$season.weightPG[ycoordsPG$PlotGroup == "C3sub"] +
 ycoordsPG$season.weightPG[ycoordsPG$PlotGroup == "C4"] +
 ycoordsPG$season.weightPG[ycoordsPG$PlotGroup == "CAM"]
 ycoordsPG$ymax <- NA
 ycoordsPG$ymax <- ycoordsPG$ymin + ycoordsPG$seasonalnppPG
 
-##Note:* Right now, there is just a black box around the NPP values. Adding a texture in ggplot is stupidly hard, but I could do it. A prettier solution may be to use a lighter version of the same colour to represent NPP. When we decide on final groups, we can change those colours.  
+##Note:* Right now, there is just a black box around the NPP values. Adding a texture in ggplot is stupidly hard, but I could do it. A prettier solution may be to use a lighter version of the same colour to represent NPP. When we decide on final groups, we can change those colours.
 ##These are two of the components (precip and biomass) we might want in the final Figure 1. They have been set to the same time scales, but I'm keeping them as separate figures for now. Even looking at two of these figures side-by-side seems busy to me. Maybe the rodent-plant-precip figures should remain as 3 separate panels?
-##Now that I'm looking at these plots, I realize I don't really care about NPP. It's true that it may represent yummy fresh growth, but standing biomass and NPP are both just proxies for what we really care about: seed production. We hope that a lot of biomass or new biomass represents a good seed year, but we don't know. So I think we should simplify and just include standing biomass. 
+##Now that I'm looking at these plots, I realize I don't really care about NPP. It's true that it may represent yummy fresh growth, but standing biomass and NPP are both just proxies for what we really care about: seed production. We hope that a lot of biomass or new biomass represents a good seed year, but we don't know. So I think we should simplify and just include standing biomass.
 
 finalPFT.plot <- ggplot(PFTsummary[PFTsummary$season!=1,], aes(x = fakedate, y = season.weightPFT, group = PFT, fill = PFT, colour=PFT)) +
-theme_bw() + 
+theme_bw() +
 geom_bar(stat="identity", width=100) +
-theme(axis.title.x=element_blank(), 
-legend.key.size=unit(0.8, "lines"), 
+theme(axis.title.x=element_blank(),
+legend.key.size=unit(0.8, "lines"),
 legend.background = element_rect(fill = "transparent", colour = "transparent"),
 legend.title=element_text(size=11),
 axis.title.y=element_text(size=11)) +
@@ -399,13 +401,13 @@ scale_fill_manual(values=c("#c2a5cf", "#7b3294", "#a6dba0", "#008837"), name = "
 scale_colour_manual(values=c("#c2a5cf", "#7b3294", "#a6dba0", "#008837"), name = "Plant Functional\nGroup") +
 scale_x_date(date_labels = "%Y", date_breaks = "2 year",
 limits = c(as.Date("2004-05-01"), as.Date("2015-09-01"))) +
-xlab("Time") + ylab(expression(atop("Standing Biomass", 
+xlab("Time") + ylab(expression(atop("Standing Biomass",
 "(g/"*m^2*")")))
 
 finalPFTNPP.plot <- ggplot(PFTsummary[PFTsummary$season!=1,], aes(x = fakedate, y = seasonalnppPFT, group = PFT, fill = PFT, colour=PFT)) +
-theme_bw() + 
+theme_bw() +
 geom_bar(stat="identity", width=100) +
-theme(axis.title.x=element_blank(), legend.key.size=unit(0.8, "lines"), 
+theme(axis.title.x=element_blank(), legend.key.size=unit(0.8, "lines"),
 legend.background = element_rect(fill = "transparent", colour = "transparent"),
 legend.title=element_text(size=11),
 axis.title.y=element_text(size=11)) +
@@ -413,17 +415,17 @@ scale_fill_manual(values=c("#c2a5cf", "#7b3294", "#a6dba0", "#008837"), name = "
 scale_colour_manual(values=c("#c2a5cf", "#7b3294", "#a6dba0", "#008837"), name = "Plant Functional\nGroup") +
 scale_x_date(date_labels = "%Y", date_breaks = "2 year",
 limits = c(as.Date("2004-05-01"), as.Date("2015-09-01"))) +
-xlab("Time") + ylab(expression(atop("Seasonal NPP", 
+xlab("Time") + ylab(expression(atop("Seasonal NPP",
 "(g/"*m^2*")")))
 
 precip.plot2 <- ggplot(PGsummary, aes(x = fakedate, y = season.precip, fill=season.precip, colour=season.precip)) +
 theme_bw() +
-geom_bar(stat="identity", width=100) +  
+geom_bar(stat="identity", width=100) +
 scale_fill_gradient2(low = '#67001f', high = '#4393c3', mid='#f7f7f7',
-midpoint = mean(met.data$season.precip, na.rm=T), 
+midpoint = mean(met.data$season.precip, na.rm=T),
 name="Precipitation") +
   scale_colour_gradient2(low = '#67001f', high = '#4393c3', mid='#f7f7f7',
-                         midpoint = mean(met.data$season.precip, na.rm=T), 
+                         midpoint = mean(met.data$season.precip, na.rm=T),
                          name="Precipitation") +
   theme(axis.title.x=element_blank(), legend.key.size=unit(0.6, "lines"),
         legend.title=element_text(size=11),
@@ -435,12 +437,12 @@ name="Precipitation") +
 sevmouseplot <- ggplot(ave.mouse.cap, aes(x = fakedate, y = sum.cap.trap, group=guild, colour=guild)) +
   theme_bw() +
   #  geom_line(alpha=0.5) +
-  stat_summary(fun.y = mean, geom="line", alpha=0.8, size=0.8) + 
-  geom_point(data=ave.mouse.cap[ave.mouse.cap$guild=="pgfv",], 
+  stat_summary(fun.y = mean, geom="line", alpha=0.8, size=0.8) +
+  geom_point(data=ave.mouse.cap[ave.mouse.cap$guild=="pgfv",],
              aes(y=sum.cap.trap, colour=guild)) +
   scale_colour_manual(name="Species", guide="legend",
                       values=c("#e31a1c", "#fd8d3c", "#fecc5c"),
-                      labels=c(expression(italic("Perognathus flavus")), 
+                      labels=c(expression(italic("Perognathus flavus")),
                                "Other Heteromyids", "Cricetids")) +
   theme(legend.key.size=unit(0.8, "lines"),
         legend.title=element_text(size=11),
@@ -454,7 +456,7 @@ sevmouseplot <- ggplot(ave.mouse.cap, aes(x = fakedate, y = sum.cap.trap, group=
 finalthreeplots <- plot_grid(precip.plot2, finalPFT.plot, finalPFTNPP.plot, sevmouseplot,
                              align = 'v', ncol=1, scale=0.98,
                              rel_heights = c(1,1.1,1.1,1.4),
-                             labels=c('A', 'B', 'C', 'D'), hjust=-0.2) 
+                             labels=c('A', 'B', 'C', 'D'), hjust=-0.2)
 
 
 ##Write out PFTsummary table and final figures
