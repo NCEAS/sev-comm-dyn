@@ -46,4 +46,4 @@ createEML <- function(){
     dc <- as.person("Scott Collins scollins@sevilleta.unm.edu")
     dataset_contact <- as(dc, "contact")
     dataset@contact <- new("ListOfcontact", c(dataset_contact))
-
+}
