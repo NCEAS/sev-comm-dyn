@@ -12,57 +12,60 @@ process_dp1 <- function() {
 
     # Create a DataPackage to hold all of the objects
     dp <- new("DataPackage")
-    dataDir <- "/Users/slaughter/Projects/DataONE/Provenance/GOA-HydroCarbonDB/newdatapack"
-    emlFile <- sprintf("%s/metadata.xml", dataDir)
-    EMLdoc <- read_eml(emlFile)
+    dataDir <- "."
+    emlFile <- sprintf("%s/dp1-metadata.xml", dataDir)
+    eml <- create_eml()
 
     inputs <- list()
     outputs <- list()
     # Create a DataObject to hold the script file
-    progObj <- new("DataObject", format="application/R", filename=sprintf("%s/%s", dataDir, "df35b.268.1.R"),
-                   mediaType="text/x-rsrc",
-                   suggestedFilename="Total_PAH_and_Alkanes_GoA_Hydrocarbons_Clean.R")
+    # progObj <- new("DataObject", format="application/R", filename=sprintf("%s/%s", dataDir, "df35b.268.1.R"),
+    #                mediaType="text/x-rsrc",
+    #                suggestedFilename="Total_PAH_and_Alkanes_GoA_Hydrocarbons_Clean.R")
     # Add the script DataObject to the DataPackage
-    dp <- addData(dp, progObj)
+    # dp <- addData(dp, progObj)
+
     # Update the distribution URL in the EML object to match the DataONE PID for this object
-    EMLdoc <- updateEMLdistURL(EMLdoc, entityName="Data merging R script", resolveUrl=sprintf("%s/%s", resolveURI, getIdentifier(progObj)))
-
-    do <- new("DataObject", format="text/csv", filename=sprintf("%s/%s", dataDir, "df35b.256.1.csv"), suggestedFilename="Non-EVOS SINs.csv")
-    dp <- addData(dp, do)
-    inputs[[length(inputs)+1]] <- do
-    EMLdoc <- updateEMLdistURL(EMLdoc, entityName="Non-EVOS SINs.csv", resolveUrl=sprintf("%s/%s", resolveURI, getIdentifier(do)))
-
-    doOut <- new("DataObject", format="text/csv", filename=sprintf("%s/%s", dataDir, "df35b.254.3.csv"), suggestedFilename="Total_Aromatic_Alkanes_PWS.csv")
-    dp <- addData(dp, doOut)
-    outputs[[length(outputs)+1]] <- doOut
-    EMLdoc <- updateEMLdistURL(EMLdoc, entityName="Total_Aromatic_Alkanes_PWS.csv", resolveUrl=sprintf("%s/%s", resolveURI, getIdentifier(doOut)))
+    # EMLdoc <- updateEMLdistURL(EMLdoc, entityName="Data merging R script", resolveUrl=sprintf("%s/%s", resolveURI, getIdentifier(progObj)))
+    #
+    # do <- new("DataObject", format="text/csv", filename=sprintf("%s/%s", dataDir, "df35b.256.1.csv"), suggestedFilename="Non-EVOS SINs.csv")
+    # dp <- addData(dp, do)
+    # inputs[[length(inputs)+1]] <- do
+    # EMLdoc <- updateEMLdistURL(EMLdoc, entityName="Non-EVOS SINs.csv", resolveUrl=sprintf("%s/%s", resolveURI, getIdentifier(do)))
+    #
+    # doOut <- new("DataObject", format="text/csv", filename=sprintf("%s/%s", dataDir, "df35b.254.3.csv"), suggestedFilename="Total_Aromatic_Alkanes_PWS.csv")
+    # dp <- addData(dp, doOut)
+    # outputs[[length(outputs)+1]] <- doOut
+    # EMLdoc <- updateEMLdistURL(EMLdoc, entityName="Total_Aromatic_Alkanes_PWS.csv", resolveUrl=sprintf("%s/%s", resolveURI, getIdentifier(doOut)))
 
 
     # Now add the provenance relationships for this script, and it's inputs and outputs
-    dp <- insertDerivation(dp, sources=inputs, program=progObj, derivations=outputs)
+    # dp <- insertDerivation(dp, sources=inputs, program=progObj, derivations=outputs)
 
 
     # Associate the metadata object with each package member
-    pids <- getIdentifiers(dp)
-    for(iPid in 1:length(pids)) {
-        thisPid <- pids[[iPid]]
-        dp <- insertRelationship(dp, subjectID=getIdentifier(metadataObj), objectIDs=thisPid)
-    }
+    # pids <- getIdentifiers(dp)
+    # for(iPid in 1:length(pids)) {
+    #     thisPid <- pids[[iPid]]
+    #     dp <- insertRelationship(dp, subjectID=getIdentifier(metadataObj), objectIDs=thisPid)
+    # }
     # Add each object to the DataPackage
 
     # Add provenance information about the objects
 
     # Upload package to the repository
-    cn <- CNode("DEV2")
-    mn <- getMNode(cn, "urn:node:mnDevUCSB1")
-    d1c <- new("D1Client", cn=cn, mn=mn)
-
-    resourceMapId <- uploadDataPackage(d1c, dp, replicate=TRUE, public=TRUE, quiet=F, resolveURI=resolveURI)
+    # cn <- CNode("DEV2")
+    # mn <- getMNode(cn, "urn:node:mnDevUCSB1")
+    # d1c <- new("D1Client", cn=cn, mn=mn)
+    #
+    # resourceMapId <- uploadDataPackage(d1c, dp, replicate=TRUE, public=TRUE, quiet=F, resolveURI=resolveURI)
 
 
 }
 
-createEML <- function(){
+create_eml <- function(){
+    eml <- new("eml")
+    return(eml)
 
     title <- "Sevilleta LTER Metstation number 49, precipition, daily raw and gap filled from 1992 - 2015"
     pubDate <- "2017"
@@ -150,6 +153,5 @@ createEML <- function(){
     #look at the standard units to get them right
     standardUnits <- get_unitList()
     View(standardUnits$units)
-
 
 }
