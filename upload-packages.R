@@ -28,8 +28,7 @@ process_dp1 <- function() {
     file_path <- sprintf("%s/%s", dataDir, file_name)
     progObj <- new("DataObject", format="application/R", filename=file_path,
                    mediaType="text/x-rsrc", suggestedFilename=file_name)
-    other_entity <- create_entity_eml(file_name, file_description, file_path, progObj@sysmeta@identifier, cn@endpoint)
-    eml@dataset@otherEntity <- c(other_entity)
+    eml <- add_entity_eml(eml, file_name, file_description, file_path, progObj@sysmeta@identifier, cn@endpoint)
     dp <- addData(dp, progObj)
 
     # Update the distribution URL in the EML object to match the DataONE PID for this object
@@ -133,7 +132,7 @@ create_eml <- function(){
     return(eml)
 }
 
-create_entity_eml <- function(entity_name, entity_description, file_path, identifier, resolve_uri) {
+add_entity_eml <- function(eml, entity_name, entity_description, file_path, identifier, resolve_uri) {
 
     if (stringr::str_detect(file_path, '.*.R$')) {
         other_entity <- new("otherEntity")
@@ -150,7 +149,8 @@ create_entity_eml <- function(entity_name, entity_description, file_path, identi
         phys@dataFormat@externallyDefinedFormat@formatName <- "application/R"
         phys@distribution <- c(dist)
         other_entity@physical <- c(phys)
-        return(other_entity)
+        eml@dataset@otherEntity <- c(other_entity)
+        return(eml)
     } else {
         df <- read.csv(paste(file_path, entity_name, sep = "/"), header=TRUE, sep=",", quote="\"", as.is=TRUE)
 
