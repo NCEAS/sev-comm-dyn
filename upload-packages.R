@@ -44,18 +44,6 @@ process_dp1 <- function() {
                mediaType="text/csv", suggestedFilename=file_name)
     eml <- add_entity_eml(eml, file_name, file_description, file_path, do2@sysmeta@identifier, cn@endpoint)
 
-    # Now add the provenance relationships for this script, and it's inputs and outputs
-    # dp <- insertDerivation(dp, sources=inputs, program=progObj, derivations=outputs)
-
-
-    # Associate the metadata object with each package member
-    # pids <- getIdentifiers(dp)
-    # for(iPid in 1:length(pids)) {
-    #     thisPid <- pids[[iPid]]
-    #     dp <- insertRelationship(dp, subjectID=getIdentifier(metadataObj), objectIDs=thisPid)
-    # }
-    # Add each object to the DataPackage
-
     # Set the package identifier
     eml_id <- paste0("urn:uuid:", uuid::UUIDgenerate())
     eml@packageId <- new("xml_attribute", eml_id)
