@@ -72,10 +72,11 @@ process_dp1 <- function() {
     dp <- addData(dp, progObj, mo=eml_object)
     dp <- addData(dp, do2, mo=eml_object)
 
-    # Add provenance information about the objects
-    sources <- list(do1)
-    derivations <- list(do2)
-    dp <- insertDerivation(dp, sources, progObj, derivations)
+    # Add provenance information about the derived objects
+    dp <- insertDerivation(dp,
+                           sources=list("sev.1.file1", "sev.1.file2", "sev.1.file3", "sev.1.file4", "sev.1.file5"),
+                           derivations=list(do1@sysmeta@identifier))
+    dp <- insertDerivation(dp, do1, progObj, do2)
     relations <- getRelationships(dp)
     relations[,1:3]
 
