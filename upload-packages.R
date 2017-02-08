@@ -7,18 +7,24 @@ library(stringr)
 library(dataone)
 library(uuid)
 
-process_dp1 <- function() {
+# Set up repository access
+cn <- CNode("DEV2")
+mn <- getMNode(cn, "urn:node:mnDevUCSB1")
+d1c <- new("D1Client", cn=cn, mn=mn)
 
-    # Set up repository access
-    cn <- CNode("DEV2")
-    mn <- getMNode(cn, "urn:node:mnDevUCSB1")
-    d1c <- new("D1Client", cn=cn, mn=mn)
+
+process_dp1 <- function() {
 
     # Create a DataPackage to hold all of the objects
     dp <- new("DataPackage")
     dataDir <- getwd()
     eml_file <- sprintf("%s/dp1-metadata.xml", dataDir)
-    eml <- create_eml()
+    title <- "Sevilleta LTER Metstation number 49, precipition, daily raw and gap filled from 1992 - 2015"
+    pubDate <- "2017"
+    abstract_file <- paste(dataDir,"abstractdp1.txt", sep = "/")
+    keywords <- c("meteorology", "precipitation")
+
+    eml <- create_eml(title, pubDate, abstract_file, keywords)
 
     # Create a DataObject to hold the script file and add it to the EML file
     file_name <- "Met_gap_fill.R"
@@ -73,12 +79,10 @@ process_dp1 <- function() {
 
 }
 
-create_eml <- function(){
+create_eml <- function(title, pubDate, abstract_file, keywords){
     eml <- new("eml")
 
-    title <- "Sevilleta LTER Metstation number 49, precipition, daily raw and gap filled from 1992 - 2015"
-    pubDate <- "2017"
-    abstract <- as(set_TextType("abstractdp1.txt"), "abstract")
+    abstract <- as(set_TextType(abstract_file), "abstract")
 
     #start the dataset EML
     dataset <- new("dataset",
@@ -103,7 +107,7 @@ create_eml <- function(){
 
     #add keywords
     keywordSet <- c(new("keywordSet",
-                        keyword = c("meteorology", "precipitation")))
+                        keyword = keywords))
 
     dataset@keywordSet <- new("ListOfkeywordSet", c(keywordSet))
 
