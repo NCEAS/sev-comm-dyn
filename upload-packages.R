@@ -20,9 +20,6 @@ process_dp1 <- function() {
     eml_file <- sprintf("%s/dp1-metadata.xml", dataDir)
     eml <- create_eml()
 
-    inputs <- list()
-    outputs <- list()
-
     # Create a DataObject to hold the script file and add it to the EML file
     file_name <- "Met_gap_fill.R"
     file_description <- "R script that fills in data gaps in meteorlogical data."
@@ -73,11 +70,12 @@ process_dp1 <- function() {
                       mediaType="text/xml", suggestedFilename=basename(eml_file))
     dp <- addData(dp, do1, mo=eml_object)
     dp <- addData(dp, progObj, mo=eml_object)
+    dp <- addData(dp, do2, mo=eml_object)
 
     # Add provenance information about the objects
     sources <- list(do1)
     derivations <- list(do2)
-    insertDerivation(dp, sources, progObj, derivations)
+    dp <- insertDerivation(dp, sources, progObj, derivations)
     relations <- getRelationships(dp)
     relations[,1:3]
 
