@@ -151,8 +151,57 @@ create_eml <- function(){
 
 
     #look at the standard units to get them right
-    standardUnits <- get_unitList()
-    View(standardUnits$units)
+    #standardUnits <- get_unitList()
+    #View(standardUnits$units)
+
+    #define custom unit for joulePerCentimeterSquared
+    unitType <- data.frame(id = c("energyPerArea", "energyPerArea"), dimension = c("energy", "area"), power = c(1, 0.0001) )
+    custom_units <- data.frame(id = "joulePerCentimeterSquared", unitType = "energyPerArea", parentSI = "joulesPerSquareKilometer", multiplierToSI = 0.0001, description = "solar radiation")
+    unitsList <- set_unitList(custom_units, unitType)
+
+    #read the attributes file back in with all new entries
+    attributes <- read.csv("met_all_csv_metadata.csv", header = TRUE, sep = ",", quote = "\"", as.is = TRUE, na.strings = "")
+
+    #factors <- read.csv(paste(workingdirectory,"table_factors.csv", sep = "/" ), header = TRUE, sep = ",", quote = "\"", as.is = TRUE)
+
+    # get the column classes into a vector as required by the set_attribute function
+    col_classes <- attributes[,"columnClasses"]
+
+    #take out that column again
+    attributes$columnClasses <- NULL
+
+    #with the attributes data frames in place we can create the attributeList element - no factors need to be defined for this dataset
+    attributeList <- set_attributes(attributes, col_classes = col_classes)
+
+    #physical parameter for standard Microsoft csv file
+    physical <- set_physical(datafile,
+                             numHeaderLines = "1",
+                             recordDelimiter = "\\r\\n")
+
+
+    #pull to gether information for the dataTable
+    dataTable1 <- new("dataTable",
+                      entityName = datafile,
+                      entityDescription = "daily average or total metstation data from Sevilleta LTER",
+                      physical = physical,
+                      attributeList = attributeList)
+
+
+    dataset@dataTable <- new("ListOfdataTable", c(dataTable1))
+
+    #add to eml element
+    eml <- new("eml",
+               packageId = "",
+               system = "",
+               access = access,
+               dataset = dataset)
+
+    #validate the eml
+    eml_validate(eml)
+
+    #print out the eml xml file
+    write_eml(eml, paste("met_all_excel.xml", sep = "/" ))
+
 
 }
 
