@@ -1,0 +1,2 @@
+Sevilleta LTER data set 51(http://sev.lternet.edu/data/sev-51) contains taxonomic and ecological information for the plant species on the Sevilleta National Wildlife Refuge. This file was updated with additional plant functional groups (C3, C4 and CAM) and life form (annual, perennial, forb, shrub, or subshrub) based on expert opinion provided by professors at the University of New Mexico familiar with this ecosystem.  
+
