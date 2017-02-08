@@ -5,6 +5,7 @@ library(EML)
 library(rmarkdown)
 library(stringr)
 library(dataone)
+library(uuid)
 
 process_dp1 <- function() {
 
@@ -22,14 +23,13 @@ process_dp1 <- function() {
     inputs <- list()
     outputs <- list()
 
-    # Create a DataObject to hold the script file and add it to the package and EML file
+    # Create a DataObject to hold the script file and add it to the EML file
     file_name <- "Met_gap_fill.R"
     file_description <- "R script that fills in data gaps in meteorlogical data."
     file_path <- sprintf("%s/%s", dataDir, file_name)
     progObj <- new("DataObject", format="application/R", filename=file_path,
                    mediaType="text/x-rsrc", suggestedFilename=file_name)
     eml <- add_entity_eml(eml, file_name, file_description, file_path, progObj@sysmeta@identifier, cn@endpoint)
-    dp <- addData(dp, progObj)
 
     # Update the distribution URL in the EML object to match the DataONE PID for this object
     # eml <- updateEMLdistURL(eml, entityName="Data merging R script", resolveUrl=sprintf("%s/%s", resolveURI, getIdentifier(progObj)))
@@ -58,14 +58,18 @@ process_dp1 <- function() {
     # Add each object to the DataPackage
 
     # Set the package identifier
-    eml@packageId <- new("xml_attribute", "foo")
+    eml_id <- paste0("urn:uuid:", uuid::UUIDgenerate())
+    eml@packageId <- new("xml_attribute", eml_id)
     eml@system <- new("xml_attribute", "knb")
 
-    # Validate the eml
+    # Validate the eml and write it to disk
     eml_validate(eml)
+    write_eml(eml, eml_file)
 
-    # Write out the eml xml file to disk
-    #write_eml(eml, eml_file)
+    # add the data objects and EML to the DataPackage
+    eml_object <- new("DataObject", format="eml://ecoinformatics.org/eml-2.1.1", filename=eml_file,
+                      mediaType="text/xml", suggestedFilename=basename(eml_file))
+    dp <- addData(dp, progObj, mo=eml_object)
 
     # Add provenance information about the objects
 
