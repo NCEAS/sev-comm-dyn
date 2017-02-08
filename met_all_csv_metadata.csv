@@ -1,0 +1,16 @@
+attributeName,formatString,unit,numberType,definition,attributeDefinition,columnClasses,minimum,maximum
+Date,yyyy-mm-dd,,,,,Date,1/1/1988,9/9/2016
+Sta,,,,station ID,station ID,character,1,50
+Avg.Temp,,celsius,,,mean daily air temperature,numeric,-999,34.6
+Max.Temp,,celsius,,,Maximum daily air temperature,numeric,-999,49.4
+Min.Temp,,celsius,,,minimum daily air temperature,numeric,-999,28.6
+Avg_RH,,dimensionless,,,mean daily relative humidity in percent,numeric,-999,106.3
+Precip,,millimeter,,,total daily precipitation,numeric,-999,83.5
+Avg_VP,,millibar,,,mean daily vapor pressure Started collecting this variable in Dec 90. Vapor pressure as calculated from the relative humidyt from the 207 temp/Relative humidity sensor. Computational method for derived data: saturation vapor pressure at measured temperature times measured relative humidity,numeric,-999,2.191
+Avg.Wind.SP,,metersPerSecond,,,mean daily wind speed,numeric,-999,16.5
+Avg.Resultant.WindSP,,metersPerSecond,,,mean daily resultant windspeed,numeric,-999,15.9
+Avg.Wind.Dir,,degree,,,mean daily wind direction,numeric,-999,360
+Solar.Rad,,joulePerCentimeterSquared,,,mean daily solar radiation,numeric,-999,41.2
+Avg.Soil.Temp,,celsius,,,mean daily soil temperature,numeric,-999,36.9
+Max.Soil.Temp,,celsius,,,maximum daily soil temperature,numeric,-999,45.8
+Min.Soil.Temp,,celsius,,,minmum daily soil temperature,numeric,-999,32.5
