@@ -130,6 +130,8 @@ createEML <- function(){
                              columnClasses = character(rows),
                              minimum = character(rows),
                              maximum = character(rows),
+                             missingValueCode = character(rows),
+                             missingValueCodeExplanation = character(rows),
                              stringsAsFactors = FALSE)
 
     #get some metadata from data frame
@@ -142,7 +144,7 @@ createEML <- function(){
     #set what R thinks is integer to numeric
     attributes$columnClasses[attributes$columnClasses == "integer"] <- "numeric"
     #write the prepared template to a csv file
-    write.csv(attributes, file = "met_all_csv_metadata.csv", row.names = FALSE)
+    #write.csv(attributes, file = "met_all_csv_metadata.csv", row.names = FALSE)
 
 
     #look at the standard units to get them right
