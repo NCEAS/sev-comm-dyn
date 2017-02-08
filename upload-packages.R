@@ -155,3 +155,28 @@ create_eml <- function(){
     View(standardUnits$units)
 
 }
+
+# Update the distribution url in the EML object with the DataONE URL
+updateEMLdistURL <- function(EMLdoc, entityName, resolveUrl) {
+    # Search for the entity among the 'otherEntity' elements
+    found <- FALSE
+    for (iEntity in 1:length(EMLdoc@dataset@otherEntity@.Data)) {
+        thisEntityName <- EMLdoc@dataset@otherEntity@.Data[[iEntity]]@entityName
+        if(thisEntityName == entityName) {
+            message(sprintf("Updating otherEntity %s in EML\n", thisEntityName))
+            EMLdoc@dataset@otherEntity@.Data[[iEntity]]@physical[[1]]@distribution[[1]]@online@url@.Data <- resolveUrl
+            found <- TRUE
+        }
+    }
+    if(found) return(EMLdoc)
+    # If not already found, search for the entity among the 'dataTable' elements
+    for (iEntity in 1:length(EMLdoc@dataset@dataTable@.Data)) {
+        thisEntityName <- EMLdoc@dataset@dataTable@.Data[[iEntity]]@entityName
+        if(thisEntityName == entityName) {
+            message(sprintf("Update dataTable %s in EML\n", thisEntityName))
+            EMLdoc@dataset@dataTable@.Data[[iEntity]]@physical[[1]]@distribution[[1]]@online@url@.Data <- resolveUrl
+        }
+    }
+    return(EMLdoc)
+}
+
