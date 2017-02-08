@@ -79,6 +79,20 @@ process_dp1 <- function() {
 
 }
 
+process_dp2 <- function(){
+
+    # Create a DataPackage to hold all of the objects
+    dp <- new("DataPackage")
+    dataDir <- getwd()
+    eml_file <- sprintf("%s/dp2-metadata.xml", dataDir)
+    title <- "Sevilleta species list with life form designations"
+    pubDate <- "2017"
+    abstract_file <- paste(dataDir,"abstractdp2.txt", sep = "/")
+    keywords <- c("species names", "taxonomy", "life forms", "metabolism")
+
+
+}
+
 create_eml <- function(title, pubDate, abstract_file, keywords){
     eml <- new("eml")
 
