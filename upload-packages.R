@@ -9,18 +9,22 @@ process_dp1 <- function() {
     # Create a DataPackage to hold all of the objects
     dp <- new("DataPackage")
     dataDir <- getwd()
-    emlFile <- sprintf("%s/dp1-metadata.xml", dataDir)
+    eml_file <- sprintf("%s/dp1-metadata.xml", dataDir)
     eml <- create_eml()
 
     inputs <- list()
     outputs <- list()
 
     # Create a DataObject to hold the script file and add it to the package
-    progFile <- "Met_gap_fill.R"
-    progObj <- new("DataObject", format="application/R",
-                   filename=sprintf("%s/%s", dataDir, progFile),
+    file_name <- "Met_gap_fill.R"
+    file_path <- sprintf("%s/%s", dataDir, progFile)
+    progObj <- new("DataObject", format="application/R", filename=file_path,
                    mediaType="text/x-rsrc", suggestedFilename=progFile)
-    # entity <- create_entity_eml(progFile, progObj@identifier, path)
+    other_entity <- new("otherEntity")
+    #other_entity <- create_entity_eml(file_name, progObj@sysmeta@identifier, file_path)
+    #data_table_list <- eml_get(eml, "dataTable")
+    other_entity_list <- c(eml_get(eml, "otherEntity"), other_entity)
+    eml@dataset@otherEntity <- new("ListOfotherEntity", other_entity_list)
     dp <- addData(dp, progObj)
 
     # Update the distribution URL in the EML object to match the DataONE PID for this object
@@ -49,6 +53,12 @@ process_dp1 <- function() {
     # }
     # Add each object to the DataPackage
 
+    # Validate the eml
+    eml_validate(eml)
+
+    # Write out the eml xml file to disk
+    #write_eml(eml, eml_file)
+
     # Add provenance information about the objects
 
     # Upload package to the repository
@@ -57,7 +67,6 @@ process_dp1 <- function() {
     # d1c <- new("D1Client", cn=cn, mn=mn)
     #
     # resourceMapId <- uploadDataPackage(d1c, dp, replicate=TRUE, public=TRUE, quiet=F, resolveURI=resolveURI)
-
 
 }
 
@@ -189,21 +198,7 @@ create_entity_eml <- function(entity_name, file_path, identifier) {
                       attributeList = attributeList)
 
 
-    dataset@dataTable <- new("ListOfdataTable", c(dataTable1))
-
-    #add to eml element
-    eml <- new("eml",
-               packageId = "",
-               system = "",
-               access = access,
-               dataset = dataset)
-
-    #validate the eml
-    eml_validate(eml)
-
-    #print out the eml xml file
-    write_eml(eml, paste("met_all_excel.xml", sep = "/" ))
-
+    return(dataTable1)
 }
 
 # Update the distribution url in the EML object with the DataONE URL
