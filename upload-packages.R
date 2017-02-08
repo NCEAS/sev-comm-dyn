@@ -151,49 +151,20 @@ add_entity_eml <- function(eml, entity_name, entity_description, file_path, iden
         eml@dataset@otherEntity <- c(other_entity)
         return(eml)
     } else {
-        df <- read.csv(paste(file_path, entity_name, sep = "/"), header=TRUE, sep=",", quote="\"", as.is=TRUE)
-
-        #set up the attribute metadata csv file
-        rows <- ncol(df)
-
-        attributes <- data.frame(attributeName = character(rows),
-                                 formatString = character(rows),
-                                 unit = character(rows),
-                                 numberType = character(rows),
-                                 definition = character(rows),
-                                 attributeDefinition = character(rows),
-                                 columnClasses = character(rows),
-                                 minimum = character(rows),
-                                 maximum = character(rows),
-                                 missingValueCode = character(rows),
-                                 missingValueCodeExplanation = character(rows),
-                                 stringsAsFactors = FALSE)
-
-        #get some metadata from data frame
-        #add the column names to the template file
-        attributes$attributeName <- names(df)
-        #get the data types for each column
-        attributes$columnClasses <- sapply(df, class)
-        attributes$minimum <- sapply(df, min)
-        attributes$maximum <- sapply(df, max)
-        #set what R thinks is integer to numeric
-        attributes$columnClasses[attributes$columnClasses == "integer"] <- "numeric"
-        #write the prepared template to a csv file
-        metafile_name <- paste(entity_name,"meta.csv", sep = "")
-        #write.csv(attributes, file = paste(file_path, metafile_name, sep = "/"), row.names = FALSE)
-
-
-        #look at the standard units to get them right
-        #standardUnits <- get_unitList()
-        #View(standardUnits$units)
-
-        #define custom unit for joulePerCentimeterSquared
-        unitType <- data.frame(id = c("energyPerArea", "energyPerArea"), dimension = c("energy", "area"), power = c(1, 0.0001) )
-        custom_units <- data.frame(id = "joulePerCentimeterSquared", unitType = "energyPerArea", parentSI = "joulesPerSquareKilometer", multiplierToSI = 0.0001, description = "solar radiation")
-        unitsList <- set_unitList(custom_units, unitType)
+        #define custom units
+        unitTypefile_name <- paste(file_name, "unitType.csv", sep = "")
+        if(file.exists(paste(file_path, unitTypefile_name, sep = "/"))){
+            unitType <- read.csv(paste(file_path,unitTypefile_name,sep = "/"), header = TRUE, sep = ",", quote = "\"", as.is = TRUE, na.strings = "")
+            custom_unitsfile_name <- paste(file_name, "custom_units.csv", sep = "")
+            custom_units <- read.csv(paste(file_path, custom_unitsfile_name, sep = "/"), header = TRUE, sep = ",", quote = "\"", as.is = TRUE, na.strings = "")
+            unitsList <- set_unitList(custom_units, unitType)
+            additionalMetadta <- as(unitsList, "additionalMetadata")
+            eml@additionalMetadata <- c(additionalMetadata)
+        }
 
         #read the attributes file back in with all new entries
-        attributes <- read.csv(paste(file_path, metafile_name, sep = "/"), header = TRUE, sep = ",", quote = "\"", as.is = TRUE, na.strings = "")
+        attrmetafile_name <- paste(entity_name,"meta.csv", sep = "")
+        attributes <- read.csv(paste(file_path, attrmetafile_name, sep = "/"), header = TRUE, sep = ",", quote = "\"", as.is = TRUE, na.strings = "")
 
         factor_meta <- paste(file_path, paste(entity_name, "factor.csv", sep = ""), sep = "/")
 
@@ -217,16 +188,15 @@ add_entity_eml <- function(eml, entity_name, entity_description, file_path, iden
 
 
         #pull to gether information for the dataTable
-        dataTable1 <- new("dataTable",
-                          entityName = entity_name,
-                          entityDescription = "daily average or total metstation data from Sevilleta LTER",
-                          physical = physical,
-                          attributeList = attributeList)
 
-        additionalMetadata = as(unitsList, "additionalMetadata")
+        eml@dataset@dataTable <- new("dataTable",
+                                     entityName = entity_name,
+                                     entityDescription = entity_description,
+                                     physical = physical,
+                                     attributeList = attributeList)
 
 
-        return(dataTable1, additionalMetadata)
+        return(eml)
     }
 }
 
