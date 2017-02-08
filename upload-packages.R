@@ -33,11 +33,19 @@ process_dp1 <- function() {
 
     # Document and add the first data file to the package
     file_name <- "Met_all_excel.csv"
-    file_description <- ""
+    file_description <- "Sevilleta Meteorological data"
     file_path <- sprintf("%s/%s", dataDir, file_name)
     do1 <- new("DataObject", format="text/csv", filename=file_path,
                    mediaType="text/csv", suggestedFilename=file_name)
     eml <- add_entity_eml(eml, file_name, file_description, file_path, do1@sysmeta@identifier, cn@endpoint)
+
+    # Document and add the derived data file to the package
+    file_name <- "Met_all.csv"
+    file_description <- "Sevilleta Meteorological data, with gaps filled"
+    file_path <- sprintf("%s/%s", dataDir, file_name)
+    do2 <- new("DataObject", format="text/csv", filename=file_path,
+               mediaType="text/csv", suggestedFilename=file_name)
+    eml <- add_entity_eml(eml, file_name, file_description, file_path, do2@sysmeta@identifier, cn@endpoint)
 
     # Now add the provenance relationships for this script, and it's inputs and outputs
     # dp <- insertDerivation(dp, sources=inputs, program=progObj, derivations=outputs)
@@ -67,6 +75,11 @@ process_dp1 <- function() {
     dp <- addData(dp, progObj, mo=eml_object)
 
     # Add provenance information about the objects
+    sources <- list(do1)
+    derivations <- list(do2)
+    insertDerivation(dp, sources, progObj, derivations)
+    relations <- getRelationships(dp)
+    relations[,1:3]
 
     # Upload package to the repository
     # resourceMapId <- uploadDataPackage(d1c, dp, replicate=TRUE, public=TRUE, quiet=F, resolveURI=resolveURI)
