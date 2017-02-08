@@ -3,6 +3,7 @@
 library(datapack)
 library(EML)
 library(rmarkdown)
+library(stringr)
 
 process_dp1 <- function() {
 
@@ -20,8 +21,7 @@ process_dp1 <- function() {
     file_path <- sprintf("%s/%s", dataDir, file_name)
     progObj <- new("DataObject", format="application/R", filename=file_path,
                    mediaType="text/x-rsrc", suggestedFilename=file_name)
-    other_entity <- new("otherEntity")
-    #other_entity <- create_entity_eml(file_name, progObj@sysmeta@identifier, file_path)
+    other_entity <- create_entity_eml(file_name, file_path, progObj@sysmeta@identifier)
     other_entity_list <- c(eml_get(eml, "otherEntity"), other_entity)
     eml@dataset@otherEntity <- new("ListOfotherEntity", other_entity_list)
     dp <- addData(dp, progObj)
@@ -129,75 +129,83 @@ create_eml <- function(){
 
 create_entity_eml <- function(entity_name, file_path, identifier) {
 
-    df <- read.csv("Met_all_excel.csv", header=TRUE, sep=",", quote="\"", as.is=TRUE)
+    if (stringr::str_detect(file_path, '.*.R$')) {
+        other_entity <- new("otherEntity")
+        other_entity@entityName <- entity_name
+        other_entity@entityType <- "text/x-rsrc"
+        #other_entity@physical
+        return(other_entity)
+    } else {
+        df <- read.csv("Met_all_excel.csv", header=TRUE, sep=",", quote="\"", as.is=TRUE)
 
-    #set up the attribute metadata csv file
-    rows <- ncol(df)
+        #set up the attribute metadata csv file
+        rows <- ncol(df)
 
-    attributes <- data.frame(attributeName = character(rows),
-                             formatString = character(rows),
-                             unit = character(rows),
-                             numberType = character(rows),
-                             definition = character(rows),
-                             attributeDefinition = character(rows),
-                             columnClasses = character(rows),
-                             minimum = character(rows),
-                             maximum = character(rows),
-                             missingValueCode = character(rows),
-                             missingValueCodeExplanation = character(rows),
-                             stringsAsFactors = FALSE)
+        attributes <- data.frame(attributeName = character(rows),
+                                 formatString = character(rows),
+                                 unit = character(rows),
+                                 numberType = character(rows),
+                                 definition = character(rows),
+                                 attributeDefinition = character(rows),
+                                 columnClasses = character(rows),
+                                 minimum = character(rows),
+                                 maximum = character(rows),
+                                 missingValueCode = character(rows),
+                                 missingValueCodeExplanation = character(rows),
+                                 stringsAsFactors = FALSE)
 
-    #get some metadata from data frame
-    #add the column names to the template file
-    attributes$attributeName <- names(df)
-    #get the data types for each column
-    attributes$columnClasses <- sapply(df, class)
-    attributes$minimum <- sapply(df, min)
-    attributes$maximum <- sapply(df, max)
-    #set what R thinks is integer to numeric
-    attributes$columnClasses[attributes$columnClasses == "integer"] <- "numeric"
-    #write the prepared template to a csv file
-    #write.csv(attributes, file = "met_all_csv_metadata.csv", row.names = FALSE)
-
-
-    #look at the standard units to get them right
-    #standardUnits <- get_unitList()
-    #View(standardUnits$units)
-
-    #define custom unit for joulePerCentimeterSquared
-    unitType <- data.frame(id = c("energyPerArea", "energyPerArea"), dimension = c("energy", "area"), power = c(1, 0.0001) )
-    custom_units <- data.frame(id = "joulePerCentimeterSquared", unitType = "energyPerArea", parentSI = "joulesPerSquareKilometer", multiplierToSI = 0.0001, description = "solar radiation")
-    unitsList <- set_unitList(custom_units, unitType)
-
-    #read the attributes file back in with all new entries
-    attributes <- read.csv("met_all_csv_metadata.csv", header = TRUE, sep = ",", quote = "\"", as.is = TRUE, na.strings = "")
-
-    #factors <- read.csv(paste(workingdirectory,"table_factors.csv", sep = "/" ), header = TRUE, sep = ",", quote = "\"", as.is = TRUE)
-
-    # get the column classes into a vector as required by the set_attribute function
-    col_classes <- attributes[,"columnClasses"]
-
-    #take out that column again
-    attributes$columnClasses <- NULL
-
-    #with the attributes data frames in place we can create the attributeList element - no factors need to be defined for this dataset
-    attributeList <- set_attributes(attributes, col_classes = col_classes)
-
-    #physical parameter for standard Microsoft csv file
-    physical <- set_physical(datafile,
-                             numHeaderLines = "1",
-                             recordDelimiter = "\\r\\n")
+        #get some metadata from data frame
+        #add the column names to the template file
+        attributes$attributeName <- names(df)
+        #get the data types for each column
+        attributes$columnClasses <- sapply(df, class)
+        attributes$minimum <- sapply(df, min)
+        attributes$maximum <- sapply(df, max)
+        #set what R thinks is integer to numeric
+        attributes$columnClasses[attributes$columnClasses == "integer"] <- "numeric"
+        #write the prepared template to a csv file
+        #write.csv(attributes, file = "met_all_csv_metadata.csv", row.names = FALSE)
 
 
-    #pull to gether information for the dataTable
-    dataTable1 <- new("dataTable",
-                      entityName = datafile,
-                      entityDescription = "daily average or total metstation data from Sevilleta LTER",
-                      physical = physical,
-                      attributeList = attributeList)
+        #look at the standard units to get them right
+        #standardUnits <- get_unitList()
+        #View(standardUnits$units)
+
+        #define custom unit for joulePerCentimeterSquared
+        unitType <- data.frame(id = c("energyPerArea", "energyPerArea"), dimension = c("energy", "area"), power = c(1, 0.0001) )
+        custom_units <- data.frame(id = "joulePerCentimeterSquared", unitType = "energyPerArea", parentSI = "joulesPerSquareKilometer", multiplierToSI = 0.0001, description = "solar radiation")
+        unitsList <- set_unitList(custom_units, unitType)
+
+        #read the attributes file back in with all new entries
+        attributes <- read.csv("met_all_csv_metadata.csv", header = TRUE, sep = ",", quote = "\"", as.is = TRUE, na.strings = "")
+
+        #factors <- read.csv(paste(workingdirectory,"table_factors.csv", sep = "/" ), header = TRUE, sep = ",", quote = "\"", as.is = TRUE)
+
+        # get the column classes into a vector as required by the set_attribute function
+        col_classes <- attributes[,"columnClasses"]
+
+        #take out that column again
+        attributes$columnClasses <- NULL
+
+        #with the attributes data frames in place we can create the attributeList element - no factors need to be defined for this dataset
+        attributeList <- set_attributes(attributes, col_classes = col_classes)
+
+        #physical parameter for standard Microsoft csv file
+        physical <- set_physical(datafile,
+                                 numHeaderLines = "1",
+                                 recordDelimiter = "\\r\\n")
 
 
-    return(dataTable1)
+        #pull to gether information for the dataTable
+        dataTable1 <- new("dataTable",
+                          entityName = datafile,
+                          entityDescription = "daily average or total metstation data from Sevilleta LTER",
+                          physical = physical,
+                          attributeList = attributeList)
+
+
+        return(dataTable1)
+    }
 }
 
 # Update the distribution url in the EML object with the DataONE URL
