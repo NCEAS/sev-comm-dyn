@@ -31,19 +31,13 @@ process_dp1 <- function() {
                    mediaType="text/x-rsrc", suggestedFilename=file_name)
     eml <- add_entity_eml(eml, file_name, file_description, file_path, progObj@sysmeta@identifier, cn@endpoint)
 
-    # Update the distribution URL in the EML object to match the DataONE PID for this object
-    # eml <- updateEMLdistURL(eml, entityName="Data merging R script", resolveUrl=sprintf("%s/%s", resolveURI, getIdentifier(progObj)))
-    #
-    # do <- new("DataObject", format="text/csv", filename=sprintf("%s/%s", dataDir, "df35b.256.1.csv"), suggestedFilename="Non-EVOS SINs.csv")
-    # dp <- addData(dp, do)
-    # inputs[[length(inputs)+1]] <- do
-    # eml <- updateEMLdistURL(eml, entityName="Non-EVOS SINs.csv", resolveUrl=sprintf("%s/%s", resolveURI, getIdentifier(do)))
-    #
-    # doOut <- new("DataObject", format="text/csv", filename=sprintf("%s/%s", dataDir, "df35b.254.3.csv"), suggestedFilename="Total_Aromatic_Alkanes_PWS.csv")
-    # dp <- addData(dp, doOut)
-    # outputs[[length(outputs)+1]] <- doOut
-    # eml <- updateEMLdistURL(eml, entityName="Total_Aromatic_Alkanes_PWS.csv", resolveUrl=sprintf("%s/%s", resolveURI, getIdentifier(doOut)))
-
+    # Document and add the first data file to the package
+    file_name <- "Met_all_excel.csv"
+    file_description <- ""
+    file_path <- sprintf("%s/%s", dataDir, file_name)
+    do1 <- new("DataObject", format="text/csv", filename=file_path,
+                   mediaType="text/csv", suggestedFilename=file_name)
+    eml <- add_entity_eml(eml, file_name, file_description, file_path, do1@sysmeta@identifier, cn@endpoint)
 
     # Now add the provenance relationships for this script, and it's inputs and outputs
     # dp <- insertDerivation(dp, sources=inputs, program=progObj, derivations=outputs)
@@ -69,6 +63,7 @@ process_dp1 <- function() {
     # add the data objects and EML to the DataPackage
     eml_object <- new("DataObject", format="eml://ecoinformatics.org/eml-2.1.1", filename=eml_file,
                       mediaType="text/xml", suggestedFilename=basename(eml_file))
+    dp <- addData(dp, do1, mo=eml_object)
     dp <- addData(dp, progObj, mo=eml_object)
 
     # Add provenance information about the objects
