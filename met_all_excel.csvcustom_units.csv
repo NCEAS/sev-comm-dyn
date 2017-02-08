@@ -1,0 +1,2 @@
+id,unitType,parentSI,multiplierToSI,description
+joulePerCentimeterSquared,energyPerArea,joulesPerSquareKilometer,0.0001,solar radiation

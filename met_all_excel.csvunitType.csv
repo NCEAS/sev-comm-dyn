@@ -1,0 +1,3 @@
+id,dimension,power
+energyPerArea,energy,1
+energyPerArea,area,0.0001
