@@ -4,8 +4,14 @@ library(datapack)
 library(EML)
 library(rmarkdown)
 library(stringr)
+library(dataone)
 
 process_dp1 <- function() {
+
+    # Set up repository access
+    cn <- CNode("DEV2")
+    mn <- getMNode(cn, "urn:node:mnDevUCSB1")
+    d1c <- new("D1Client", cn=cn, mn=mn)
 
     # Create a DataPackage to hold all of the objects
     dp <- new("DataPackage")
@@ -18,12 +24,12 @@ process_dp1 <- function() {
 
     # Create a DataObject to hold the script file and add it to the package and EML file
     file_name <- "Met_gap_fill.R"
+    file_description <- "R script that fills in data gaps in meteorlogical data."
     file_path <- sprintf("%s/%s", dataDir, file_name)
     progObj <- new("DataObject", format="application/R", filename=file_path,
                    mediaType="text/x-rsrc", suggestedFilename=file_name)
-    other_entity <- create_entity_eml(file_name, file_path, progObj@sysmeta@identifier)
-    other_entity_list <- c(eml_get(eml, "otherEntity"), other_entity)
-    eml@dataset@otherEntity <- new("ListOfotherEntity", other_entity_list)
+    other_entity <- create_entity_eml(file_name, file_description, file_path, progObj@sysmeta@identifier, cn@endpoint)
+    eml@dataset@otherEntity <- c(other_entity)
     dp <- addData(dp, progObj)
 
     # Update the distribution URL in the EML object to match the DataONE PID for this object
@@ -52,6 +58,10 @@ process_dp1 <- function() {
     # }
     # Add each object to the DataPackage
 
+    # Set the package identifier
+    eml@packageId <- new("xml_attribute", "foo")
+    eml@system <- new("xml_attribute", "knb")
+
     # Validate the eml
     eml_validate(eml)
 
@@ -61,10 +71,6 @@ process_dp1 <- function() {
     # Add provenance information about the objects
 
     # Upload package to the repository
-    # cn <- CNode("DEV2")
-    # mn <- getMNode(cn, "urn:node:mnDevUCSB1")
-    # d1c <- new("D1Client", cn=cn, mn=mn)
-    #
     # resourceMapId <- uploadDataPackage(d1c, dp, replicate=TRUE, public=TRUE, quiet=F, resolveURI=resolveURI)
 
 }
@@ -127,13 +133,23 @@ create_eml <- function(){
     return(eml)
 }
 
-create_entity_eml <- function(entity_name, file_path, identifier) {
+create_entity_eml <- function(entity_name, entity_description, file_path, identifier, resolve_uri) {
 
     if (stringr::str_detect(file_path, '.*.R$')) {
         other_entity <- new("otherEntity")
         other_entity@entityName <- entity_name
+        other_entity@entityDescription <- entity_description
         other_entity@entityType <- "text/x-rsrc"
-        #other_entity@physical
+        resolve_url <- paste(resolve_uri, identifier, sep="/")
+        online <- new("online")
+        online@url <- new("url", resolve_url)
+        dist <- new("distribution")
+        dist@online <- online
+        phys <- new("physical")
+        phys@objectName <- basename(file_path)
+        phys@dataFormat@externallyDefinedFormat@formatName <- "application/R"
+        phys@distribution <- c(dist)
+        other_entity@physical <- c(phys)
         return(other_entity)
     } else {
         df <- read.csv("Met_all_excel.csv", header=TRUE, sep=",", quote="\"", as.is=TRUE)
