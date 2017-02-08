@@ -12,31 +12,31 @@ process_dp1 <- function() {
 
     # Create a DataPackage to hold all of the objects
     dp <- new("DataPackage")
-    dataDir <- "."
+    dataDir <- getwd()
     emlFile <- sprintf("%s/dp1-metadata.xml", dataDir)
     eml <- create_eml()
 
     inputs <- list()
     outputs <- list()
-    # Create a DataObject to hold the script file
-    # progObj <- new("DataObject", format="application/R", filename=sprintf("%s/%s", dataDir, "df35b.268.1.R"),
-    #                mediaType="text/x-rsrc",
-    #                suggestedFilename="Total_PAH_and_Alkanes_GoA_Hydrocarbons_Clean.R")
-    # Add the script DataObject to the DataPackage
-    # dp <- addData(dp, progObj)
+    # Create a DataObject to hold the script file and add it to the package
+    progFile <- "Met_gap_fill.R"
+    progObj <- new("DataObject", format="application/R",
+                   filename=sprintf("%s/%s", dataDir, progFile),
+                   mediaType="text/x-rsrc", suggestedFilename=progFile)
+    dp <- addData(dp, progObj)
 
     # Update the distribution URL in the EML object to match the DataONE PID for this object
-    # EMLdoc <- updateEMLdistURL(EMLdoc, entityName="Data merging R script", resolveUrl=sprintf("%s/%s", resolveURI, getIdentifier(progObj)))
+    # eml <- updateEMLdistURL(eml, entityName="Data merging R script", resolveUrl=sprintf("%s/%s", resolveURI, getIdentifier(progObj)))
     #
     # do <- new("DataObject", format="text/csv", filename=sprintf("%s/%s", dataDir, "df35b.256.1.csv"), suggestedFilename="Non-EVOS SINs.csv")
     # dp <- addData(dp, do)
     # inputs[[length(inputs)+1]] <- do
-    # EMLdoc <- updateEMLdistURL(EMLdoc, entityName="Non-EVOS SINs.csv", resolveUrl=sprintf("%s/%s", resolveURI, getIdentifier(do)))
+    # eml <- updateEMLdistURL(eml, entityName="Non-EVOS SINs.csv", resolveUrl=sprintf("%s/%s", resolveURI, getIdentifier(do)))
     #
     # doOut <- new("DataObject", format="text/csv", filename=sprintf("%s/%s", dataDir, "df35b.254.3.csv"), suggestedFilename="Total_Aromatic_Alkanes_PWS.csv")
     # dp <- addData(dp, doOut)
     # outputs[[length(outputs)+1]] <- doOut
-    # EMLdoc <- updateEMLdistURL(EMLdoc, entityName="Total_Aromatic_Alkanes_PWS.csv", resolveUrl=sprintf("%s/%s", resolveURI, getIdentifier(doOut)))
+    # eml <- updateEMLdistURL(eml, entityName="Total_Aromatic_Alkanes_PWS.csv", resolveUrl=sprintf("%s/%s", resolveURI, getIdentifier(doOut)))
 
 
     # Now add the provenance relationships for this script, and it's inputs and outputs
