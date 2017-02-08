@@ -14,11 +14,13 @@ process_dp1 <- function() {
 
     inputs <- list()
     outputs <- list()
+
     # Create a DataObject to hold the script file and add it to the package
     progFile <- "Met_gap_fill.R"
     progObj <- new("DataObject", format="application/R",
                    filename=sprintf("%s/%s", dataDir, progFile),
                    mediaType="text/x-rsrc", suggestedFilename=progFile)
+    # entity <- create_entity_eml(progFile, progObj@identifier, path)
     dp <- addData(dp, progObj)
 
     # Update the distribution URL in the EML object to match the DataONE PID for this object
@@ -87,9 +89,6 @@ create_eml <- function(){
     dataset_contact <- as(dc, "contact")
     dataset@contact <- new("ListOfcontact", c(dataset_contact))
 
-    eml@dataset <- dataset
-    return(eml)
-
     #add keywords
     keywordSet <- c(new("keywordSet",
                         keyword = c("meteorology", "precipitation")))
@@ -101,21 +100,26 @@ create_eml <- function(){
 
 
     #add methods
-    methods <- set_methods("methods.docx")
-
-    dataset@methods <- methods
+    # methods <- set_methods("methods.docx")
+    #
+    # dataset@methods <- methods
 
     #add coverage
-    begindate <- "1992-01-01"
-    enddate <- "2016-09-18"
-    geographicDescription <- "Five Points Meteorological Station (No. 49) is at the Southern edge of Mckenzie Flats - about 2.5 km west of the actual  Five-Points.  North of the road and just northeast of the intersection where another road takes off going north.  Transition area from creosote to the south into Grasslands to the north"
-    coverage <- set_coverage(begin = begindate, end = enddate,
-                             geographicDescription = geographicDescription,
-                             west = -106.729, east = -106.729,
-                             north = 34.335, south = 34.335)
+    # begindate <- "1992-01-01"
+    # enddate <- "2016-09-18"
+    # geographicDescription <- "Five Points Meteorological Station (No. 49) is at the Southern edge of Mckenzie Flats - about 2.5 km west of the actual  Five-Points.  North of the road and just northeast of the intersection where another road takes off going north.  Transition area from creosote to the south into Grasslands to the north"
+    # coverage <- set_coverage(begin = begindate, end = enddate,
+    #                          geographicDescription = geographicDescription,
+    #                          west = -106.729, east = -106.729,
+    #                          north = 34.335, south = 34.335)
+    #
+    # dataset@coverage <- coverage
 
-    dataset@coverage <- coverage
+    eml@dataset <- dataset
+    return(eml)
+}
 
+create_entity_eml <- function(entity_name, file_path, identifier) {
 
     df <- read.csv("Met_all_excel.csv", header=TRUE, sep=",", quote="\"", as.is=TRUE)
 
@@ -199,7 +203,6 @@ create_eml <- function(){
 
     #print out the eml xml file
     write_eml(eml, paste("met_all_excel.xml", sep = "/" ))
-
 
 }
 
