@@ -152,7 +152,7 @@ create_entity_eml <- function(entity_name, entity_description, file_path, identi
         other_entity@physical <- c(phys)
         return(other_entity)
     } else {
-        df <- read.csv("Met_all_excel.csv", header=TRUE, sep=",", quote="\"", as.is=TRUE)
+        df <- read.csv(paste(file_path, entity_name, sep = "/"), header=TRUE, sep=",", quote="\"", as.is=TRUE)
 
         #set up the attribute metadata csv file
         rows <- ncol(df)
@@ -180,7 +180,8 @@ create_entity_eml <- function(entity_name, entity_description, file_path, identi
         #set what R thinks is integer to numeric
         attributes$columnClasses[attributes$columnClasses == "integer"] <- "numeric"
         #write the prepared template to a csv file
-        #write.csv(attributes, file = "met_all_csv_metadata.csv", row.names = FALSE)
+        metafile_name <- paste(entity_name,"meta.csv", sep = "")
+        #write.csv(attributes, file = paste(file_path, metafile_name, sep = "/"), row.names = FALSE)
 
 
         #look at the standard units to get them right
@@ -193,9 +194,13 @@ create_entity_eml <- function(entity_name, entity_description, file_path, identi
         unitsList <- set_unitList(custom_units, unitType)
 
         #read the attributes file back in with all new entries
-        attributes <- read.csv("met_all_csv_metadata.csv", header = TRUE, sep = ",", quote = "\"", as.is = TRUE, na.strings = "")
+        attributes <- read.csv(paste(file_path, metafile_name, sep = "/"), header = TRUE, sep = ",", quote = "\"", as.is = TRUE, na.strings = "")
 
-        #factors <- read.csv(paste(workingdirectory,"table_factors.csv", sep = "/" ), header = TRUE, sep = ",", quote = "\"", as.is = TRUE)
+        factor_meta <- paste(file_path, paste(entity_name, "factor.csv", sep = ""), sep = "/")
+
+        if(file.exists(factor_meta)){
+            factors <- read.csv(factor_meta, header = TRUE, sep = ",", quote = "\"", as.is = TRUE)
+        }
 
         # get the column classes into a vector as required by the set_attribute function
         col_classes <- attributes[,"columnClasses"]
@@ -207,20 +212,22 @@ create_entity_eml <- function(entity_name, entity_description, file_path, identi
         attributeList <- set_attributes(attributes, col_classes = col_classes)
 
         #physical parameter for standard Microsoft csv file
-        physical <- set_physical(datafile,
+        physical <- set_physical(entity_name,
                                  numHeaderLines = "1",
                                  recordDelimiter = "\\r\\n")
 
 
         #pull to gether information for the dataTable
         dataTable1 <- new("dataTable",
-                          entityName = datafile,
+                          entityName = entity_name,
                           entityDescription = "daily average or total metstation data from Sevilleta LTER",
                           physical = physical,
                           attributeList = attributeList)
 
+        additionalMetadata = as(unitsList, "additionalMetadata")
 
-        return(dataTable1)
+
+        return(dataTable1, additionalMetadata)
     }
 }
 
