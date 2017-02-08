@@ -185,9 +185,12 @@ add_entity_eml <- function(eml, entity_name, entity_description, file_path, iden
         attributeList <- set_attributes(attributes, col_classes = col_classes)
 
         #physical parameter for standard Microsoft csv file
+        resolve_url <- paste(resolve_uri, identifier, sep="/")
+
         physical <- set_physical(file_name,
                                  numHeaderLines = "1",
-                                 recordDelimiter = "\\r\\n")
+                                 recordDelimiter = "\\r\\n",
+                                 url = resolve_url)
 
 
         #pull to gether information for the dataTable
