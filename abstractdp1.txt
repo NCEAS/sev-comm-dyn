@@ -1,0 +1,2 @@
+This file contains daily meteorological data collected from a network of 10 permanent weather stations on the Sevilleta National Wildlife Refuge downloaded as a csv from the Sevilleta LTER data-portal (http://tierra.unm.edu/search/climate/search.php). Missing data cells were gap-filled from the nearest meteorological station using Met_gap_fill.R 
+
