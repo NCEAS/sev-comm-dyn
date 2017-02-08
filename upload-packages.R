@@ -15,14 +15,13 @@ process_dp1 <- function() {
     inputs <- list()
     outputs <- list()
 
-    # Create a DataObject to hold the script file and add it to the package
+    # Create a DataObject to hold the script file and add it to the package and EML file
     file_name <- "Met_gap_fill.R"
-    file_path <- sprintf("%s/%s", dataDir, progFile)
+    file_path <- sprintf("%s/%s", dataDir, file_name)
     progObj <- new("DataObject", format="application/R", filename=file_path,
-                   mediaType="text/x-rsrc", suggestedFilename=progFile)
+                   mediaType="text/x-rsrc", suggestedFilename=file_name)
     other_entity <- new("otherEntity")
     #other_entity <- create_entity_eml(file_name, progObj@sysmeta@identifier, file_path)
-    #data_table_list <- eml_get(eml, "dataTable")
     other_entity_list <- c(eml_get(eml, "otherEntity"), other_entity)
     eml@dataset@otherEntity <- new("ListOfotherEntity", other_entity_list)
     dp <- addData(dp, progObj)
