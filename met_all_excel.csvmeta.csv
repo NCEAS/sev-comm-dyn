@@ -1,16 +1,16 @@
 attributeName,formatString,unit,numberType,definition,attributeDefinition,columnClasses,minimum,maximum,missingValueCode,missingValueCodeExplanation
 Date,yyyy-mm-dd,,,,sample date,Date,1/1/1988,9/9/2016,,
 Sta,,,,station ID,station ID,character,1,50,,
-Avg.Temp,,celsius,,,mean daily air temperature,numeric,-20,50,-999,missing values
-Max.Temp,,celsius,,,Maximum daily air temperature,numeric,-20,50,-999,missing values
-Min.Temp,,celsius,,,minimum daily air temperature,numeric,-20,50,-999,missing values
-Avg_RH,,dimensionless,,,mean daily relative humidity in percent,numeric,0,110,-999,missing values
-Precip,,millimeter,,,total daily precipitation,numeric,0,100,-999,missing values
-Avg_VP,,millibar,,,mean daily vapor pressure Started collecting this variable in Dec 90. Vapor pressure as calculated from the relative humidyt from the 207 temp/Relative humidity sensor. Computational method for derived data: saturation vapor pressure at measured temperature times measured relative humidity,numeric,0,5,-999,missing values
-Avg.Wind.SP,,metersPerSecond,,,mean daily wind speed,numeric,0,50,-999,missing values
-Avg.Resultant.WindSP,,metersPerSecond,,,mean daily resultant windspeed,numeric,0,50,-999,missing values
-Avg.Wind.Dir,,degree,,,mean daily wind direction,numeric,0,360,-999,missing values
-Solar.Rad,,joulePerCentimeterSquared,,,mean daily solar radiation,numeric,0,50,-999,missing values
-Avg.Soil.Temp,,celsius,,,mean daily soil temperature,numeric,-20,50,-999,missing values
-Max.Soil.Temp,,celsius,,,maximum daily soil temperature,numeric,-20,50,-999,missing values
-Min.Soil.Temp,,celsius,,,minmum daily soil temperature,numeric,-20,50,-999,missing values
+Avg.Temp,,celsius,real,,mean daily air temperature,numeric,-20,50,-999,missing values
+Max.Temp,,celsius,real,,Maximum daily air temperature,numeric,-20,50,-999,missing values
+Min.Temp,,celsius,real,,minimum daily air temperature,numeric,-20,50,-999,missing values
+Avg_RH,,dimensionless,real,,mean daily relative humidity in percent,numeric,0,110,-999,missing values
+Precip,,millimeter,real,,total daily precipitation,numeric,0,100,-999,missing values
+Avg_VP,,millibar,real,,mean daily vapor pressure Started collecting this variable in Dec 90. Vapor pressure as calculated from the relative humidyt from the 207 temp/Relative humidity sensor. Computational method for derived data: saturation vapor pressure at measured temperature times measured relative humidity,numeric,0,5,-999,missing values
+Avg.Wind.SP,,metersPerSecond,real,,mean daily wind speed,numeric,0,50,-999,missing values
+Avg.Resultant.WindSP,,metersPerSecond,real,,mean daily resultant windspeed,numeric,0,50,-999,missing values
+Avg.Wind.Dir,,degree,real,,mean daily wind direction,numeric,0,360,-999,missing values
+Solar.Rad,,joulePerCentimeterSquared,real,,mean daily solar radiation,numeric,0,50,-999,missing values
+Avg.Soil.Temp,,celsius,real,,mean daily soil temperature,numeric,-20,50,-999,missing values
+Max.Soil.Temp,,celsius,real,,maximum daily soil temperature,numeric,-20,50,-999,missing values
+Min.Soil.Temp,,celsius,real,,minmum daily soil temperature,numeric,-20,50,-999,missing values
