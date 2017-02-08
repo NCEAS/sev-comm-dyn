@@ -71,12 +71,11 @@ process_dp1 <- function() {
                            sources=list("sev.1.file1", "sev.1.file2", "sev.1.file3", "sev.1.file4", "sev.1.file5"),
                            derivations=list(do1@sysmeta@identifier))
     dp <- insertDerivation(dp, do1, progObj, do2)
-    relations <- getRelationships(dp)
-    relations[,1:3]
 
     # Upload package to the repository
-    # resourceMapId <- uploadDataPackage(d1c, dp, replicate=TRUE, public=TRUE, quiet=F, resolveURI=resolveURI)
-
+    resourceMapId <- uploadDataPackage(d1c, dp, replicate=FALSE, public=TRUE, quiet=F, resolveURI=paste0(d1c@cn@endpoint, "/resolve"))
+    message("    EML ID: ", eml_object@sysmeta@identifier)
+    message("Package ID: ", resourceMapId)
 }
 
 process_dp2 <- function(){
