@@ -212,7 +212,7 @@ create_eml <- function(title, pubDate, file_ext, keywords, dataDir){
 
 add_people_eml <- function(eml, file_ext){
 
-    set_people <- function(personinforow){
+    set_creator <- function(personinforow){
 
         individualName <- new("individualName",
                               givenName = personinforow[,"givenName"],
@@ -239,15 +239,53 @@ add_people_eml <- function(eml, file_ext){
         return(creator)
     }
 
+    set_contact <- function(personinforow){
+
+        individualName <- new("individualName",
+                              givenName = personinforow[,"givenName"],
+                              surName = personinforow[,"surName"])
+
+        contact <- new("contact",
+                       individualName = individualName,
+                       organizationName = personinforow[,"organizationName"])
+
+        if(nchar(personinforow[,"electronicMailAddress"]) > 0){
+
+            email <- new("electronicMailAddress")
+            email@.Data <- personinforow[,"electronicMailAddress"]
+            contact@electronicMailAddress <- new("ListOfelectronicMailAddress", c(email))
+        }
+
+        if(nchar(personinforow[,"userId"]) > 0){
+
+            userId <- new("userId")
+            userId@directory <- new("xml_attribute", "http://orcid.org")
+            userId@.Data <- personinforow[,"userId"]
+            contact@userId <- new("ListOfuserId", c(userId))
+        }
+        return(contact)
+    }
+
     people_file <- paste(dataDir, paste("people", file_ext, ".txt", sep = ""), sep = "/")
 
     #read csv file with person information (givenName, surName, organization,  electronicMailAddress, userId)
     personinfo <- read.csv(people_file, header = TRUE, sep = ",", colClasses = "character")
 
+    #subset personinfo for creators
+    creatorinfo
+
     #run each row through the helper function to set creators
-    eml@dataset@creator <- as(lapply(1:dim(personinfo)[1], function(i)
-        set_creator(personinfo[i,])),
+    eml@dataset@creator <- as(lapply(1:dim(creatorinfo)[1], function(i)
+        set_creator(creatorinfo[i,])),
         "ListOfcreator")
+
+    #subset personinfo for contacts
+    contactinfo
+
+    #run each row through the helper function to set creators
+    eml@dataset@contact <- as(lapply(1:dim(contactinfo)[1], function(i)
+        set_contact(contactinfo[i,])),
+        "ListOfcontact")
 
 
 }
