@@ -89,6 +89,16 @@ process_dp2 <- function(){
     abstract_file <- paste(dataDir,"abstractdp2.txt", sep = "/")
     keywords <- c("species names", "taxonomy", "life forms", "metabolism")
 
+    eml <- create_eml(title, pubDate, abstract_file, keywords)
+
+    # Document and add the first data file to the package
+    file_name <- "sevilleta_species-list.csv"
+    file_description <- "Sevilleta species list with life form designations"
+    file_path <- sprintf("%s/%s", dataDir, file_name)
+    do1 <- new("DataObject", format="text/csv", filename=file_path,
+               mediaType="text/csv", suggestedFilename=file_name)
+    eml <- add_entity_eml(eml, file_name, file_description, file_path, do1@sysmeta@identifier, cn@endpoint)
+
 
 }
 
@@ -148,6 +158,36 @@ create_eml <- function(title, pubDate, abstract_file, keywords){
     return(eml)
 }
 
+add_people_eml <- function(peoplefile_name){
+
+    set_creator <- function(personinforow){
+
+        individualName <- new("individualName",
+                              givenName = personinforow[,"givenName"],
+                              surName = personinforow[,"surName"])
+
+        creator <- new("creator",
+                       individualName = individualName,
+                       organizationName = personinforow[,"organizationName"])
+
+        if(nchar(personinforow[,"electronicMailAddress"]) > 0){
+
+            email <- new("electronicMailAddress")
+            email@.Data <- personinforow[,"electronicMailAddress"]
+            creator@electronicMailAddress <- new("ListOfelectronicMailAddress", c(email))
+        }
+
+        if(nchar(personinforow[,"userId"]) > 0){
+
+            userId <- new("userId")
+            userId@directory <- new("xml_attribute", "http://orcid.org")
+            userId@.Data <- personinforow[,"userId"]
+            creator@userId <- new("ListOfuserId", c(userId))
+        }
+    }
+
+}
+
 add_entity_eml <- function(eml, entity_name, entity_description, file_path, identifier, resolve_uri) {
 
     if (stringr::str_detect(file_path, '.*.R$')) {
@@ -163,6 +203,25 @@ add_entity_eml <- function(eml, entity_name, entity_description, file_path, iden
         phys <- new("physical")
         phys@objectName <- basename(file_path)
         phys@dataFormat@externallyDefinedFormat@formatName <- "application/R"
+        phys@distribution <- c(dist)
+        other_entity@physical <- c(phys)
+        current_other_entities <- eml@dataset@otherEntity
+        current_other_entities[[length(current_other_entities)+1]] <- other_entity
+        eml@dataset@otherEntity <- current_other_entities
+        return(eml)
+    } else if(stringr::str_detect(file_path, '.*.png$')){
+        other_entity <- new("otherEntity")
+        other_entity@entityName <- entity_name
+        other_entity@entityDescription <- entity_description
+        other_entity@entityType <- "image/png"
+        resolve_url <- paste(resolve_uri, identifier, sep="/")
+        online <- new("online")
+        online@url <- new("url", resolve_url)
+        dist <- new("distribution")
+        dist@online <- online
+        phys <- new("physical")
+        phys@objectName <- basename(file_path)
+        phys@dataFormat@externallyDefinedFormat@formatName <- "image/png"
         phys@distribution <- c(dist)
         other_entity@physical <- c(phys)
         current_other_entities <- eml@dataset@otherEntity
