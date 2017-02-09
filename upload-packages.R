@@ -165,7 +165,9 @@ add_entity_eml <- function(eml, entity_name, entity_description, file_path, iden
         phys@dataFormat@externallyDefinedFormat@formatName <- "application/R"
         phys@distribution <- c(dist)
         other_entity@physical <- c(phys)
-        eml@dataset@otherEntity <- c(other_entity)
+        current_other_entities <- eml@dataset@otherEntity
+        current_other_entities[[length(current_other_entities)+1]] <- other_entity
+        eml@dataset@otherEntity <- current_other_entities
         return(eml)
     } else {
         file_name <- basename(file_path)
