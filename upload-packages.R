@@ -190,28 +190,29 @@ create_eml <- function(title, pubDate, file_ext, keywords, dataDir){
 
 
     #add methods
-    # methods <- set_methods("methods.docx")
+    # method_file <- paste(dataDir, paste("method", file_ext, ".txt", sep = ""), sep = "/")
+    # methods <- set_methods(method_file)
     #
     # dataset@methods <- methods
 
     #add coverage
-    # begindate <- "1992-01-01"
-    # enddate <- "2016-09-18"
-    # geographicDescription <- "Five Points Meteorological Station (No. 49) is at the Southern edge of Mckenzie Flats - about 2.5 km west of the actual  Five-Points.  North of the road and just northeast of the intersection where another road takes off going north.  Transition area from creosote to the south into Grasslands to the north"
-    # coverage <- set_coverage(begin = begindate, end = enddate,
-    #                          geographicDescription = geographicDescription,
-    #                          west = -106.729, east = -106.729,
-    #                          north = 34.335, south = 34.335)
-    #
-    # dataset@coverage <- coverage
+    begindate <- "1992-01-01"
+    enddate <- "2016-09-18"
+    geographicDescription <- "Five Points Meteorological Station (No. 49) is at the Southern edge of Mckenzie Flats - about 2.5 km west of the actual  Five-Points.  North of the road and just northeast of the intersection where another road takes off going north.  Transition area from creosote to the south into Grasslands to the north, Sampling sites are in creosote and black grama areas, respectively"
+    coverage <- set_coverage(begin = begindate, end = enddate,
+                             geographicDescription = geographicDescription,
+                             west = -106.729, east = -106.729,
+                             north = 34.335, south = 34.335)
+
+    dataset@coverage <- coverage
 
     eml@dataset <- dataset
     return(eml)
 }
 
-add_people_eml <- function(peoplefile_name){
+add_people_eml <- function(eml, file_ext){
 
-    set_creator <- function(personinforow){
+    set_people <- function(personinforow){
 
         individualName <- new("individualName",
                               givenName = personinforow[,"givenName"],
@@ -235,7 +236,19 @@ add_people_eml <- function(peoplefile_name){
             userId@.Data <- personinforow[,"userId"]
             creator@userId <- new("ListOfuserId", c(userId))
         }
+        return(creator)
     }
+
+    people_file <- paste(dataDir, paste("people", file_ext, ".txt", sep = ""), sep = "/")
+
+    #read csv file with person information (givenName, surName, organization,  electronicMailAddress, userId)
+    personinfo <- read.csv(people_file, header = TRUE, sep = ",", colClasses = "character")
+
+    #run each row through the helper function to set creators
+    eml@dataset@creator <- as(lapply(1:dim(personinfo)[1], function(i)
+        set_creator(personinfo[i,])),
+        "ListOfcreator")
+
 
 }
 
