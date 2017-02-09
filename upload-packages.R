@@ -220,7 +220,10 @@ add_entity_eml <- function(eml, entity_name, entity_description, file_path, iden
                          physical = physical,
                          attributeList = attributeList)
 
-        eml@dataset@dataTable <- c(dataTable)
+        current_dataTables <- eml@dataset@dataTable
+        current_dataTables[[length(current_dataTables)+1]] <- dataTable
+        eml@dataset@dataTable <- current_dataTables
+
 
         return(eml)
     }
