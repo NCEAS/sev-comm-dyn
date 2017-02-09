@@ -12,3 +12,4 @@ native,string,,,,Indicates whether the species is native or introduced to the Se
 path,string,,,,The method by which a species fixes carbon in the process of photosynthesis.,character,,,,
 a_p,string,,,,Simplified life cycle data indicating the longevity of a species,character,,,,
 g_f,string,,,,Simplified life form or physiognomy of a species.,character,,,,
+
