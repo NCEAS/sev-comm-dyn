@@ -25,6 +25,7 @@ process_dp1 <- function() {
     keywords <- c("meteorology", "precipitation")
 
     eml <- create_eml(title, pubDate, file_ext, keywords, dataDir)
+    eml <- add_people_eml(eml, file_ext)
 
     # Create a DataObject to hold the script file and add it to the EML file
     file_name <- "Met_gap_fill.R"
@@ -32,7 +33,7 @@ process_dp1 <- function() {
     file_path <- sprintf("%s/%s", dataDir, file_name)
     progObj <- new("DataObject", format="application/R", filename=file_path,
                    mediaType="text/x-rsrc", suggestedFilename=file_name)
-    eml <- add_entity_eml(eml, file_name, file_description, file_path, progObj@sysmeta@identifier, cn@endpoint)
+    eml <- add_entity_eml_new(eml, file_name, file_description, file_path, progObj@sysmeta@identifier, cn@endpoint)
 
     # Document and add the first data file to the package
     file_name <- "Met_all_excel.csv"
@@ -164,20 +165,20 @@ create_eml <- function(title, pubDate, file_ext, keywords, dataDir){
                    pubDate = pubDate,
                    abstract = abstract)
 
-    individualName <- new("individualName",
-                          givenName = "Jenn",
-                          surName = "Rudgers")
-
-    creator <- new("creator",
-                   individualName = individualName,
-                   organizationName = "University of New Mexico",
-                   electronicMailAddress = "jrudgers@unm.edu")
-
-    dataset@creator <- new("ListOfcreator", c(creator))
-
-    dc <- as.person("Scott Collins scollins@sevilleta.unm.edu")
-    dataset_contact <- as(dc, "contact")
-    dataset@contact <- new("ListOfcontact", c(dataset_contact))
+    # individualName <- new("individualName",
+    #                       givenName = "Jenn",
+    #                       surName = "Rudgers")
+    #
+    # creator <- new("creator",
+    #                individualName = individualName,
+    #                organizationName = "University of New Mexico",
+    #                electronicMailAddress = "jrudgers@unm.edu")
+    #
+    # dataset@creator <- new("ListOfcreator", c(creator))
+    #
+    # dc <- as.person("Scott Collins scollins@sevilleta.unm.edu")
+    # dataset_contact <- as(dc, "contact")
+    # dataset@contact <- new("ListOfcontact", c(dataset_contact))
 
     #add keywords
     keywordSet <- c(new("keywordSet",
@@ -190,10 +191,10 @@ create_eml <- function(title, pubDate, file_ext, keywords, dataDir){
 
 
     #add methods
-    # method_file <- paste(dataDir, paste("method", file_ext, ".txt", sep = ""), sep = "/")
-    # methods <- set_methods(method_file)
-    #
-    # dataset@methods <- methods
+    method_file <- paste(dataDir, paste("method", file_ext, ".txt", sep = ""), sep = "/")
+    methods <- set_methods(method_file)
+
+    dataset@methods <- methods
 
     #add coverage
     begindate <- "1992-01-01"
@@ -212,67 +213,14 @@ create_eml <- function(title, pubDate, file_ext, keywords, dataDir){
 
 add_people_eml <- function(eml, file_ext){
 
-    set_creator <- function(personinforow){
 
-        individualName <- new("individualName",
-                              givenName = personinforow[,"givenName"],
-                              surName = personinforow[,"surName"])
-
-        creator <- new("creator",
-                       individualName = individualName,
-                       organizationName = personinforow[,"organizationName"])
-
-        if(nchar(personinforow[,"electronicMailAddress"]) > 0){
-
-            email <- new("electronicMailAddress")
-            email@.Data <- personinforow[,"electronicMailAddress"]
-            creator@electronicMailAddress <- new("ListOfelectronicMailAddress", c(email))
-        }
-
-        if(nchar(personinforow[,"userId"]) > 0){
-
-            userId <- new("userId")
-            userId@directory <- new("xml_attribute", "http://orcid.org")
-            userId@.Data <- personinforow[,"userId"]
-            creator@userId <- new("ListOfuserId", c(userId))
-        }
-        return(creator)
-    }
-
-    set_contact <- function(personinforow){
-
-        individualName <- new("individualName",
-                              givenName = personinforow[,"givenName"],
-                              surName = personinforow[,"surName"])
-
-        contact <- new("contact",
-                       individualName = individualName,
-                       organizationName = personinforow[,"organizationName"])
-
-        if(nchar(personinforow[,"electronicMailAddress"]) > 0){
-
-            email <- new("electronicMailAddress")
-            email@.Data <- personinforow[,"electronicMailAddress"]
-            contact@electronicMailAddress <- new("ListOfelectronicMailAddress", c(email))
-        }
-
-        if(nchar(personinforow[,"userId"]) > 0){
-
-            userId <- new("userId")
-            userId@directory <- new("xml_attribute", "http://orcid.org")
-            userId@.Data <- personinforow[,"userId"]
-            contact@userId <- new("ListOfuserId", c(userId))
-        }
-        return(contact)
-    }
-
-    people_file <- paste(dataDir, paste("people", file_ext, ".txt", sep = ""), sep = "/")
+    people_file <- paste(dataDir, paste("people", file_ext, ".csv", sep = ""), sep = "/")
 
     #read csv file with person information (givenName, surName, organization,  electronicMailAddress, userId)
     personinfo <- read.csv(people_file, header = TRUE, sep = ",", colClasses = "character")
 
     #subset personinfo for creators
-    creatorinfo
+    creatorinfo <- subset(personinfo, role == "creator")
 
     #run each row through the helper function to set creators
     eml@dataset@creator <- as(lapply(1:dim(creatorinfo)[1], function(i)
@@ -280,15 +228,72 @@ add_people_eml <- function(eml, file_ext){
         "ListOfcreator")
 
     #subset personinfo for contacts
-    contactinfo
+    contactinfo <- subset(personinfo, role == "contact")
 
     #run each row through the helper function to set creators
     eml@dataset@contact <- as(lapply(1:dim(contactinfo)[1], function(i)
         set_contact(contactinfo[i,])),
         "ListOfcontact")
 
+    return(eml)
+
 
 }
+
+set_creator <- function(personinforow){
+
+    individualName <- new("individualName",
+                          givenName = personinforow[,"givenName"],
+                          surName = personinforow[,"surName"])
+
+    creator <- new("creator",
+                   individualName = individualName,
+                   organizationName = personinforow[,"organizationName"])
+
+    if(nchar(personinforow[,"electronicMailAddress"]) > 0){
+
+        email <- new("electronicMailAddress")
+        email@.Data <- personinforow[,"electronicMailAddress"]
+        creator@electronicMailAddress <- new("ListOfelectronicMailAddress", c(email))
+    }
+
+    if(nchar(personinforow[,"userId"]) > 0){
+
+        userId <- new("userId")
+        userId@directory <- new("xml_attribute", "http://orcid.org")
+        userId@.Data <- personinforow[,"userId"]
+        creator@userId <- new("ListOfuserId", c(userId))
+    }
+    return(creator)
+}
+
+set_contact <- function(personinforow){
+
+    individualName <- new("individualName",
+                          givenName = personinforow[,"givenName"],
+                          surName = personinforow[,"surName"])
+
+    contact <- new("contact",
+                   individualName = individualName,
+                   organizationName = personinforow[,"organizationName"])
+
+    if(nchar(personinforow[,"electronicMailAddress"]) > 0){
+
+        email <- new("electronicMailAddress")
+        email@.Data <- personinforow[,"electronicMailAddress"]
+        contact@electronicMailAddress <- new("ListOfelectronicMailAddress", c(email))
+    }
+
+    if(nchar(personinforow[,"userId"]) > 0){
+
+        userId <- new("userId")
+        userId@directory <- new("xml_attribute", "http://orcid.org")
+        userId@.Data <- personinforow[,"userId"]
+        contact@userId <- new("ListOfuserId", c(userId))
+    }
+    return(contact)
+}
+
 
 add_entity_eml <- function(eml, entity_name, entity_description, file_path, identifier, resolve_uri) {
 
