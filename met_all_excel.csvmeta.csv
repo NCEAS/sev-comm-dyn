@@ -1,5 +1,5 @@
 attributeName,formatString,unit,numberType,definition,attributeDefinition,columnClasses,minimum,maximum,missingValueCode,missingValueCodeExplanation
-Date,yyyy-mm-dd,,,,sample date,Date,1/1/1988,9/9/2016,,
+Date,yyyy-mm-dd,,,,sample date,Date,1988-01-01,2016-09-09,,
 Sta,,,,station ID,station ID,character,1,50,,
 Avg.Temp,,celsius,real,,mean daily air temperature,numeric,-20,50,-999,missing values
 Max.Temp,,celsius,real,,Maximum daily air temperature,numeric,-20,50,-999,missing values
