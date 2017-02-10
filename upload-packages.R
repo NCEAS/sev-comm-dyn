@@ -165,20 +165,6 @@ create_eml <- function(title, pubDate, file_ext, keywords, dataDir){
                    pubDate = pubDate,
                    abstract = abstract)
 
-    # individualName <- new("individualName",
-    #                       givenName = "Jenn",
-    #                       surName = "Rudgers")
-    #
-    # creator <- new("creator",
-    #                individualName = individualName,
-    #                organizationName = "University of New Mexico",
-    #                electronicMailAddress = "jrudgers@unm.edu")
-    #
-    # dataset@creator <- new("ListOfcreator", c(creator))
-    #
-    # dc <- as.person("Scott Collins scollins@sevilleta.unm.edu")
-    # dataset_contact <- as(dc, "contact")
-    # dataset@contact <- new("ListOfcontact", c(dataset_contact))
 
     #add keywords
     keywordSet <- c(new("keywordSet",
