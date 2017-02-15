@@ -50,6 +50,8 @@ process_dp1 <- function() {
     do2 <- new("DataObject", format="text/csv", filename=file_path,
                mediaType="text/csv", suggestedFilename=file_name)
     eml <- add_entity_eml(eml, file_name, file_description, file_path, do2@sysmeta@identifier, cn@endpoint)
+    # Save this DataObject identifier, so that dp3 can read it
+    writeLines(getIdentifier(do2), file.path(tempdir, "Met_all.csv.identifier"))
 
     # Set the package identifier
     eml_id <- paste0("urn:uuid:", uuid::UUIDgenerate())
@@ -66,6 +68,16 @@ process_dp1 <- function() {
     dp <- addData(dp, do1, mo=eml_object)
     dp <- addData(dp, progObj, mo=eml_object)
     dp <- addData(dp, do2, mo=eml_object)
+
+    # Add the DataONE PIDs for the Servilleta source meteorological data sets.
+    # The package has to be uploaded to the DataONE production  environment for these
+    # PIDs to be locateable for the provenance icons in metacatui.
+    # Note: Use these PIDs instead of 'sev1.file1', etc, when uploading to the production DataONE env.
+    #sources <- c("https://pasta.lternet.edu/package/data/eml/knb-lter-sev/1/13/6fd544ecb52935cbca5c891f2546defa",
+    #             "https://pasta.lternet.edu/package/data/eml/knb-lter-sev/1/13/e7345d4d4bf781ae59f073aa50431d9d",
+    #             "https://pasta.lternet.edu/package/data/eml/knb-lter-sev/1/13/65d65d6f9e62ca17123c90192ab5c43d",
+    #             "https://pasta.lternet.edu/package/data/eml/knb-lter-sev/1/13/83a08679fb84f7c15c3a94a3680f361d",
+    #             "https://pasta.lternet.edu/package/data/eml/knb-lter-sev/1/13/d2813a036a980b9cb99d7ab58671659e")
 
     # Add provenance information about the derived objects
     dp <- insertDerivation(dp,
@@ -93,7 +105,7 @@ process_dp2 <- function(){
     eml <- create_eml(title, pubDate, file_ext, keywords, dataDir)
 
     # Document and add the first data file to the package
-    file_name <- "sevilleta_species-list.csv"
+    file_name <- "Sevilleta_species-list.csv"
     file_description <- "Sevilleta species list with life form designations"
     file_path <- sprintf("%s/%s", dataDir, file_name)
     do1 <- new("DataObject", format="text/csv", filename=file_path,
@@ -103,10 +115,12 @@ process_dp2 <- function(){
 
 }
 
-process_dp3 <- function(){
+process_dp3 <- function() {
 
     # Create a DataPackage to hold all of the objects
     dp <- new("DataPackage")
+    sources <- list()
+    derivations <- list()
     dataDir <- getwd()
     eml_file <- sprintf("%s/dp2-metadata.xml", dataDir)
     title <- "Data analysis and graphs for publication"
@@ -115,13 +129,42 @@ process_dp3 <- function(){
     keywords <- c("species names", "taxonomy", "life forms", "metabolism")
 
     eml <- create_eml(title, pubDate, file_ext, keywords, dataDir)
+    # Add input files to the package
+    # filename read by veg_analysis.R: sev182_nppcorewebbiomass_20150816.csv
+    # Corresponding DataONE filename: sev182_anpp_20150814.txt
+    # Don't create entries in the EML for this input files as it is external to the current package and
+    # will serve to link this package to the source package that includes/produced the file.
+    sources[[length(sources)+1]] <- "https://pasta.lternet.edu/package/data/eml/knb-lter-sev/182/244946/73ad386bfbcfcd218631e495ae571ddb"
+
+    # filename read by veg_analysis.R: sev129_nppcorequadrat_20161214.csv
+    # Corresponsing DataONE filename: 	sev129_nppcorequadrat_20160718.csv
+    sources[[length(sources)+1]] <- "https://pasta.lternet.edu/package/data/eml/knb-lter-sev/129/258320/458251ae0484fc154a5140c294b5598c"
+
+    # Sevilleta species list
+    sources[[length(sources)+1]] <- "https://pasta.lternet.edu/package/data/eml/knb-lter-sev/51/186795/c03899b16eb743ff8d05eebc1f259ea3"
+
+    # Sevilleta rodent trap data
+    # filename read by veg_analysis.R: rodentdata2016_rodentdataall.csv, rodentdata2016_weightedaverages.csv
+    # Corresponding DataONE filename: sev008_rodentpopns_20160701.csv
+    sources[[length(source)+1]] <- "https://pasta.lternet.edu/package/data/eml/knb-lter-sev/8/297976/d70c7027949ca1d8ae053eb10300dc0e"
+
+    # Met_all.csv, producted by first workflow step
+    # get the DataONE PID for this dataset, after it is uploaded
+    idFile <- file.path(tempdir(), "Met_all.csv.identifier")
+    if(file.exists(idFile)) {
+        metPid <- readLines(idFile)
+        sources[[length(sources)+1]] <- metPid
+    } else {
+        stop("Unable to determine DataONE PID of file \"Met_all.csv\" from package dp1")
+    }
 
     # Document and add the first file to the package
     file_name <- "MSDS.jpg"
-    file_description <- "Odination of mice feeding guilds at two sites"
+    file_description <- "Ordination of mice feeding guilds at two sites"
     file_path <- sprintf("%s/%s", dataDir, file_name)
     do1 <- new("DataObject", format="image/jpg", filename=file_path,
                mediaType="image/jpg", suggestedFilename=file_name)
+    derivations[[length(derivations)+1]] <- do1
     eml <- add_entity_eml(eml, file_name, file_description, file_path, do1@sysmeta@identifier, cn@endpoint)
 
     # Document and add the second file to the package
@@ -130,6 +173,7 @@ process_dp3 <- function(){
     file_path <- sprintf("%s/%s", dataDir, file_name)
     do1 <- new("DataObject", format="image/png", filename=file_path,
                mediaType="image/png", suggestedFilename=file_name)
+    derivations[[length(derivations)+1]] <- do1
     eml <- add_entity_eml(eml, file_name, file_description, file_path, do1@sysmeta@identifier, cn@endpoint)
 
     # Document and add the third file to the package
@@ -138,6 +182,7 @@ process_dp3 <- function(){
     file_path <- sprintf("%s/%s", dataDir, file_name)
     do1 <- new("DataObject", format="image/png", filename=file_path,
                mediaType="image/png", suggestedFilename=file_name)
+    derivations[[length(derivations)+1]] <- do1
     eml <- add_entity_eml(eml, file_name, file_description, file_path, do1@sysmeta@identifier, cn@endpoint)
 
     # Create a DataObject to hold the script file and add it to the EML file
@@ -148,6 +193,16 @@ process_dp3 <- function(){
                    mediaType="text/x-rsrc", suggestedFilename=file_name)
     eml <- add_entity_eml(eml, file_name, file_description, file_path, progObj@sysmeta@identifier, cn@endpoint)
 
+    # Add provenance information about the derived objects
+    dp <- insertDerivation(dp,
+                           sources=sources,
+                           program=progObj,
+                           derivations=derivations)
+
+    # Upload package to the repository
+    resourceMapId <- uploadDataPackage(d1c, dp, replicate=FALSE, public=TRUE, quiet=F, resolveURI=paste0(d1c@cn@endpoint, "/resolve"))
+    message("    EML ID: ", eml_object@sysmeta@identifier)
+    message("Package ID: ", resourceMapId)
 
 }
 
