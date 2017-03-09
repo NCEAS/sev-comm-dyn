@@ -356,108 +356,108 @@ set_contact <- function(personinforow){
     return(contact)
 }
 
-
-add_entity_eml <- function(eml, entity_name, entity_description, file_path, identifier, resolve_uri) {
-
-    if (stringr::str_detect(file_path, '.*.R$')) {
-        other_entity <- new("otherEntity")
-        other_entity@entityName <- entity_name
-        other_entity@entityDescription <- entity_description
-        other_entity@entityType <- "text/x-rsrc"
-        resolve_url <- paste(resolve_uri, identifier, sep="/")
-        online <- new("online")
-        online@url <- new("url", resolve_url)
-        dist <- new("distribution")
-        dist@online <- online
-        phys <- new("physical")
-        phys@objectName <- basename(file_path)
-        phys@dataFormat@externallyDefinedFormat@formatName <- "application/R"
-        phys@distribution <- c(dist)
-        other_entity@physical <- c(phys)
-        current_other_entities <- eml@dataset@otherEntity
-        current_other_entities[[length(current_other_entities)+1]] <- other_entity
-        eml@dataset@otherEntity <- current_other_entities
-        return(eml)
-    } else if(stringr::str_detect(file_path, '.*.png$')){
-        other_entity <- new("otherEntity")
-        other_entity@entityName <- entity_name
-        other_entity@entityDescription <- entity_description
-        other_entity@entityType <- "image/png"
-        resolve_url <- paste(resolve_uri, identifier, sep="/")
-        online <- new("online")
-        online@url <- new("url", resolve_url)
-        dist <- new("distribution")
-        dist@online <- online
-        phys <- new("physical")
-        phys@objectName <- basename(file_path)
-        phys@dataFormat@externallyDefinedFormat@formatName <- "image/png"
-        phys@distribution <- c(dist)
-        other_entity@physical <- c(phys)
-        current_other_entities <- eml@dataset@otherEntity
-        current_other_entities[[length(current_other_entities)+1]] <- other_entity
-        eml@dataset@otherEntity <- current_other_entities
-        return(eml)
-    } else {
-        file_name <- basename(file_path)
-        path_only <- dirname(file_path)
-
-        #define custom units
-        unitTypefile_name <- paste(file_name, "unitType.csv", sep = "")
-        if(file.exists(paste(path_only, unitTypefile_name, sep = "/"))){
-            unitType <- read.csv(paste(path_only, unitTypefile_name, sep = "/"), header = TRUE, sep = ",", quote = "\"", as.is = TRUE, na.strings = "")
-            custom_unitsfile_name <- paste(file_name, "custom_units.csv", sep = "")
-            custom_units <- read.csv(paste(path_only, custom_unitsfile_name, sep = "/"), header = TRUE, sep = ",", quote = "\"", as.is = TRUE, na.strings = "")
-            unitsList <- set_unitList(custom_units, unitType)
-            additionalMetadata <- as(unitsList, "additionalMetadata")
-            eml@additionalMetadata <- c(additionalMetadata)
-        }
-
-        #read the attributes file back in with all new entries
-        attrmetafile_name <- paste(file_name,"meta.csv", sep = "")
-        attributes <- read.csv(paste(path_only, attrmetafile_name, sep = "/"), header = TRUE, sep = ",", quote = "\"", as.is = TRUE, na.strings = "")
-
-        factor_meta <- paste(path_only, paste(file_name, "factor.csv", sep = ""), sep = "/")
-
-        if(file.exists(factor_meta)){
-            factors <- read.csv(factor_meta, header = TRUE, sep = ",", quote = "\"", as.is = TRUE)
-        }
-
-        # get the column classes into a vector as required by the set_attribute function
-        col_classes <- attributes[,"columnClasses"]
-
-        #take out that column again
-        attributes$columnClasses <- NULL
-
-        #with the attributes data frames in place we can create the attributeList element - no factors need to be defined for this dataset
-        attributeList <- set_attributes(attributes, col_classes = col_classes)
-
-        #physical parameter for standard Microsoft csv file
-        resolve_url <- paste(resolve_uri, identifier, sep="/")
-
-        physical <- set_physical(file_name,
-                                 numHeaderLines = "1",
-                                 recordDelimiter = "\\r\\n",
-                                 url = resolve_url)
-
-
-        #pull to gether information for the dataTable
-
-        dataTable <- new("dataTable",
-                         entityName = entity_name,
-                         entityDescription = entity_description,
-                         physical = physical,
-                         attributeList = attributeList)
-
-        current_dataTables <- eml@dataset@dataTable
-        current_dataTables[[length(current_dataTables)+1]] <- dataTable
-        eml@dataset@dataTable <- current_dataTables
-
-
-        return(eml)
-    }
-
-
-}
+# this function is not used any more, new add_entity_eml below
+# add_entity_eml <- function(eml, entity_name, entity_description, file_path, identifier, resolve_uri) {
+#
+#     if (stringr::str_detect(file_path, '.*.R$')) {
+#         other_entity <- new("otherEntity")
+#         other_entity@entityName <- entity_name
+#         other_entity@entityDescription <- entity_description
+#         other_entity@entityType <- "text/x-rsrc"
+#         resolve_url <- paste(resolve_uri, identifier, sep="/")
+#         online <- new("online")
+#         online@url <- new("url", resolve_url)
+#         dist <- new("distribution")
+#         dist@online <- online
+#         phys <- new("physical")
+#         phys@objectName <- basename(file_path)
+#         phys@dataFormat@externallyDefinedFormat@formatName <- "application/R"
+#         phys@distribution <- c(dist)
+#         other_entity@physical <- c(phys)
+#         current_other_entities <- eml@dataset@otherEntity
+#         current_other_entities[[length(current_other_entities)+1]] <- other_entity
+#         eml@dataset@otherEntity <- current_other_entities
+#         return(eml)
+#     } else if(stringr::str_detect(file_path, '.*.png$')){
+#         other_entity <- new("otherEntity")
+#         other_entity@entityName <- entity_name
+#         other_entity@entityDescription <- entity_description
+#         other_entity@entityType <- "image/png"
+#         resolve_url <- paste(resolve_uri, identifier, sep="/")
+#         online <- new("online")
+#         online@url <- new("url", resolve_url)
+#         dist <- new("distribution")
+#         dist@online <- online
+#         phys <- new("physical")
+#         phys@objectName <- basename(file_path)
+#         phys@dataFormat@externallyDefinedFormat@formatName <- "image/png"
+#         phys@distribution <- c(dist)
+#         other_entity@physical <- c(phys)
+#         current_other_entities <- eml@dataset@otherEntity
+#         current_other_entities[[length(current_other_entities)+1]] <- other_entity
+#         eml@dataset@otherEntity <- current_other_entities
+#         return(eml)
+#     } else {
+#         file_name <- basename(file_path)
+#         path_only <- dirname(file_path)
+#
+#         #define custom units
+#         unitTypefile_name <- paste(file_name, "unitType.csv", sep = "")
+#         if(file.exists(paste(path_only, unitTypefile_name, sep = "/"))){
+#             unitType <- read.csv(paste(path_only, unitTypefile_name, sep = "/"), header = TRUE, sep = ",", quote = "\"", as.is = TRUE, na.strings = "")
+#             custom_unitsfile_name <- paste(file_name, "custom_units.csv", sep = "")
+#             custom_units <- read.csv(paste(path_only, custom_unitsfile_name, sep = "/"), header = TRUE, sep = ",", quote = "\"", as.is = TRUE, na.strings = "")
+#             unitsList <- set_unitList(custom_units, unitType)
+#             additionalMetadata <- as(unitsList, "additionalMetadata")
+#             eml@additionalMetadata <- c(additionalMetadata)
+#         }
+#
+#         #read the attributes file back in with all new entries
+#         attrmetafile_name <- paste(file_name,"meta.csv", sep = "")
+#         attributes <- read.csv(paste(path_only, attrmetafile_name, sep = "/"), header = TRUE, sep = ",", quote = "\"", as.is = TRUE, na.strings = "")
+#
+#         factor_meta <- paste(path_only, paste(file_name, "factor.csv", sep = ""), sep = "/")
+#
+#         if(file.exists(factor_meta)){
+#             factors <- read.csv(factor_meta, header = TRUE, sep = ",", quote = "\"", as.is = TRUE)
+#         }
+#
+#         # get the column classes into a vector as required by the set_attribute function
+#         col_classes <- attributes[,"columnClasses"]
+#
+#         #take out that column again
+#         attributes$columnClasses <- NULL
+#
+#         #with the attributes data frames in place we can create the attributeList element - no factors need to be defined for this dataset
+#         attributeList <- set_attributes(attributes, col_classes = col_classes)
+#
+#         #physical parameter for standard Microsoft csv file
+#         resolve_url <- paste(resolve_uri, identifier, sep="/")
+#
+#         physical <- set_physical(file_name,
+#                                  numHeaderLines = "1",
+#                                  recordDelimiter = "\\r\\n",
+#                                  url = resolve_url)
+#
+#
+#         #pull to gether information for the dataTable
+#
+#         dataTable <- new("dataTable",
+#                          entityName = entity_name,
+#                          entityDescription = entity_description,
+#                          physical = physical,
+#                          attributeList = attributeList)
+#
+#         current_dataTables <- eml@dataset@dataTable
+#         current_dataTables[[length(current_dataTables)+1]] <- dataTable
+#         eml@dataset@dataTable <- current_dataTables
+#
+#
+#         return(eml)
+#     }
+#
+#
+# }
 
 add_entity_eml_new <- function(eml, entity_name, entity_description, file_path, identifier, resolve_uri) {
 
