@@ -41,7 +41,7 @@ process_dp1 <- function() {
     file_path <- sprintf("%s/%s", dataDir, file_name)
     do1 <- new("DataObject", format="text/csv", filename=file_path,
                    mediaType="text/csv", suggestedFilename=file_name)
-    eml <- add_entity_eml(eml, file_name, file_description, file_path, do1@sysmeta@identifier, cn@endpoint)
+    eml <- add_entity_eml_new(eml, file_name, file_description, file_path, do1@sysmeta@identifier, cn@endpoint)
 
     # Document and add the derived data file to the package
     file_name <- "Met_all.csv"
@@ -49,7 +49,7 @@ process_dp1 <- function() {
     file_path <- sprintf("%s/%s", dataDir, file_name)
     do2 <- new("DataObject", format="text/csv", filename=file_path,
                mediaType="text/csv", suggestedFilename=file_name)
-    eml <- add_entity_eml(eml, file_name, file_description, file_path, do2@sysmeta@identifier, cn@endpoint)
+    eml <- add_entity_eml_new(eml, file_name, file_description, file_path, do2@sysmeta@identifier, cn@endpoint)
     # Save this DataObject identifier, so that dp3 can read it
     writeLines(getIdentifier(do2), file.path(tempdir, "Met_all.csv.identifier"))
 
@@ -103,14 +103,24 @@ process_dp2 <- function(){
     keywords <- c("species names", "taxonomy", "life forms", "metabolism")
 
     eml <- create_eml(title, pubDate, file_ext, keywords, dataDir)
+    eml <- add_people_eml(eml, file_ext)
 
     # Document and add the first data file to the package
-    file_name <- "Sevilleta_species-list.csv"
+    file_name <- "Sevilleta_species_list.csv"
     file_description <- "Sevilleta species list with life form designations"
     file_path <- sprintf("%s/%s", dataDir, file_name)
     do1 <- new("DataObject", format="text/csv", filename=file_path,
                mediaType="text/csv", suggestedFilename=file_name)
-    eml <- add_entity_eml(eml, file_name, file_description, file_path, do1@sysmeta@identifier, cn@endpoint)
+    eml <- add_entity_eml_new(eml, file_name, file_description, file_path, do1@sysmeta@identifier, cn@endpoint)
+
+    # Set the package identifier
+    eml_id <- paste0("urn:uuid:", uuid::UUIDgenerate())
+    eml@packageId <- new("xml_attribute", eml_id)
+    eml@system <- new("xml_attribute", "knb")
+
+    # Validate the eml and write it to disk
+    eml_validate(eml)
+    write_eml(eml, eml_file)
 
 
 }
@@ -122,13 +132,15 @@ process_dp3 <- function() {
     sources <- list()
     derivations <- list()
     dataDir <- getwd()
-    eml_file <- sprintf("%s/dp2-metadata.xml", dataDir)
+    eml_file <- sprintf("%s/dp3-metadata.xml", dataDir)
     title <- "Data analysis and graphs for publication"
     pubDate <- "2017"
     file_ext <- "dp3"
     keywords <- c("species names", "taxonomy", "life forms", "metabolism")
 
     eml <- create_eml(title, pubDate, file_ext, keywords, dataDir)
+    eml <- add_people_eml(eml, file_ext)
+
     # Add input files to the package
     # filename read by veg_analysis.R: sev182_nppcorewebbiomass_20150816.csv
     # Corresponding DataONE filename: sev182_anpp_20150814.txt
@@ -165,7 +177,7 @@ process_dp3 <- function() {
     do1 <- new("DataObject", format="image/jpg", filename=file_path,
                mediaType="image/jpg", suggestedFilename=file_name)
     derivations[[length(derivations)+1]] <- do1
-    eml <- add_entity_eml(eml, file_name, file_description, file_path, do1@sysmeta@identifier, cn@endpoint)
+    eml <- add_entity_eml_new(eml, file_name, file_description, file_path, do1@sysmeta@identifier, cn@endpoint)
 
     # Document and add the second file to the package
     file_name <- "Noble_BlackGramaCore.png"
@@ -174,7 +186,7 @@ process_dp3 <- function() {
     do1 <- new("DataObject", format="image/png", filename=file_path,
                mediaType="image/png", suggestedFilename=file_name)
     derivations[[length(derivations)+1]] <- do1
-    eml <- add_entity_eml(eml, file_name, file_description, file_path, do1@sysmeta@identifier, cn@endpoint)
+    eml <- add_entity_eml_new(eml, file_name, file_description, file_path, do1@sysmeta@identifier, cn@endpoint)
 
     # Document and add the third file to the package
     file_name <- "Noble_CreosoteCore.png"
@@ -183,7 +195,7 @@ process_dp3 <- function() {
     do1 <- new("DataObject", format="image/png", filename=file_path,
                mediaType="image/png", suggestedFilename=file_name)
     derivations[[length(derivations)+1]] <- do1
-    eml <- add_entity_eml(eml, file_name, file_description, file_path, do1@sysmeta@identifier, cn@endpoint)
+    eml <- add_entity_eml_new(eml, file_name, file_description, file_path, do1@sysmeta@identifier, cn@endpoint)
 
     # Create a DataObject to hold the script file and add it to the EML file
     file_name <- "veg_analysis.R"
@@ -191,7 +203,16 @@ process_dp3 <- function() {
     file_path <- sprintf("%s/%s", dataDir, file_name)
     progObj <- new("DataObject", format="application/R", filename=file_path,
                    mediaType="text/x-rsrc", suggestedFilename=file_name)
-    eml <- add_entity_eml(eml, file_name, file_description, file_path, progObj@sysmeta@identifier, cn@endpoint)
+    eml <- add_entity_eml_new(eml, file_name, file_description, file_path, progObj@sysmeta@identifier, cn@endpoint)
+
+    # Set the package identifier
+    eml_id <- paste0("urn:uuid:", uuid::UUIDgenerate())
+    eml@packageId <- new("xml_attribute", eml_id)
+    eml@system <- new("xml_attribute", "knb")
+
+    # Validate the eml and write it to disk
+    eml_validate(eml)
+    write_eml(eml, eml_file)
 
     # Add provenance information about the derived objects
     dp <- insertDerivation(dp,
@@ -459,20 +480,24 @@ add_entity_eml_new <- function(eml, entity_name, entity_description, file_path, 
         attrmetafile_name <- paste(file_name,"meta.csv", sep = "")
         attributes <- read.csv(paste(path_only, attrmetafile_name, sep = "/"), header = TRUE, sep = ",", quote = "\"", as.is = TRUE, na.strings = "")
 
-        factor_meta <- paste(path_only, paste(file_name, "factor.csv", sep = ""), sep = "/")
-
-        if(file.exists(factor_meta)){
-            factors <- read.csv(factor_meta, header = TRUE, sep = ",", quote = "\"", as.is = TRUE)
-        }
-
         # get the column classes into a vector as required by the set_attribute function
         col_classes <- attributes[,"columnClasses"]
 
         #take out that column again
         attributes$columnClasses <- NULL
 
-        #with the attributes data frames in place we can create the attributeList element - no factors need to be defined for this dataset
-        attributeList <- set_attributes(attributes, col_classes = col_classes)
+        factor_meta <- paste(path_only, paste(file_name, "factor.csv", sep = ""), sep = "/")
+
+        if(file.exists(factor_meta)){
+            factors <- read.csv(factor_meta, header = TRUE, sep = ",", quote = "\"", as.is = TRUE)
+            #create the attributeList element
+            attributeList <- set_attributes(attributes, col_classes = col_classes, factors = factors)
+
+        }else{
+
+            # create the attributeList element without factors
+            attributeList <- set_attributes(attributes, col_classes = col_classes)
+        }
 
         #physical parameter for standard Microsoft csv file
         resolve_url <- paste(resolve_uri, identifier, sep="/")
@@ -483,7 +508,7 @@ add_entity_eml_new <- function(eml, entity_name, entity_description, file_path, 
                                  url = resolve_url)
 
 
-        #pull to gether information for the dataTable
+        #pull together information for the dataTable
 
         dataTable <- new("dataTable",
                          entityName = entity_name,
