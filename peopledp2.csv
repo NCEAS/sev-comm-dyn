@@ -1,4 +1,4 @@
-role,givenName,surName,organizationName,electronicMailAddress,userid
-Owner,Tim,Lowrey,University of New Mexico,tlowrey@unm.edu,
-Owner,Jennifer,Rudgers,University of New Mexico,rudgersj@unm.edu,orcid.org/0000-0001-7094-4857
-Contact,Jennifer,Rudgers,University of New Mexico,rudgersj@unm.edu,orcid.org/0000-0001-7094-4857
+role,givenName,surName,organizationName,electronicMailAddress,userId
+creator,Tim,Lowrey,University of New Mexico,tlowrey@unm.edu,
+creator,Jennifer,Rudgers,University of New Mexico,rudgersj@unm.edu,orcid.org/0000-0001-7094-4857
+contact,Jennifer,Rudgers,University of New Mexico,rudgersj@unm.edu,orcid.org/0000-0001-7094-4857
