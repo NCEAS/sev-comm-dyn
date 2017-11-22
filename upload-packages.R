@@ -141,12 +141,13 @@ process_dp3 <- function() {
     eml <- create_eml(title, pubDate, file_ext, keywords, dataDir)
     eml <- add_people_eml(eml, file_ext)
 
+    # this is no longer used as of e-mail 2017-05-08
     # Add input files to the package
     # filename read by veg_analysis.R: sev182_nppcorewebbiomass_20150816.csv
     # Corresponding DataONE filename: sev182_anpp_20150814.txt
     # Don't create entries in the EML for this input files as it is external to the current package and
     # will serve to link this package to the source package that includes/produced the file.
-    sources[[length(sources)+1]] <- "https://pasta.lternet.edu/package/data/eml/knb-lter-sev/182/244946/73ad386bfbcfcd218631e495ae571ddb"
+    # sources[[length(sources)+1]] <- "https://pasta.lternet.edu/package/data/eml/knb-lter-sev/182/244946/73ad386bfbcfcd218631e495ae571ddb"
 
     # filename read by veg_analysis.R: sev129_nppcorequadrat_20161214.csv
     # Corresponsing DataONE filename: 	sev129_nppcorequadrat_20160718.csv
