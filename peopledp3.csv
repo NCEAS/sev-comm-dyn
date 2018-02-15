@@ -1,7 +1,7 @@
-role,givenName,surName,organizationName,electronicMailAddress,userId
-creator,Douglas,Moore,University of New Mexico,dmoore@sevilleta.unm.edu,
-creator,Seth,Newsome,University of New Mexico,newsome@unm.edu,
-creator,Esteban,Muldavin,University of New Mexico,muldavin@unm.edu,
-creator,Alesia,Hallmark,University of New Mexico,alesiahallmark@unm.edu,
-creator,Sydney,Jones,University of New Mexico,syd@sevilleta.unm.edu,
-contact,Scott,Collins,University of New Mexico,scollins@sevilleta.unm.edu,orcid.org/0000-0002-0193-2892
+role,givenName,surName,organizationName,electronicMailAddress,userid
+Owner,Douglas,Moore,University of New Mexico,dmoore@sevilleta.unm.edu,
+Owner,Seth,Newsome,University of New Mexico,newsome@unm.edu,
+Owner,Esteban,Muldavin,University of New Mexico,muldavin@unm.edu,
+Creator,Alesia,Hallmark,University of New Mexico,alesiahallmark@unm.edu,
+Creater,Sydney,Jones,University of New Mexico,syd@sevilleta.unm.edu,
+Contact,Scott,Collins,University of New Mexico,scollins@sevilleta.unm.edu,orcid.org/0000-0002-0193-2892

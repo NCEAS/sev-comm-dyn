@@ -1,5 +1,23 @@
-role,givenName,surName,organizationName,electronicMailAddress,userId
-creator,Douglas,Moore,University of New Mexico,dmoore@sevilleta.unm.edu,
-creator,Jennifer,Rudgers,University of New Mexico,rudgersj@unm.edu,https://orcid.org/0000-0001-7094-4857
-creator,Anny,Chung,University of New Mexico,yyachung@unm.edu,
-contact,Jennifer,Rudgers,University of New Mexico,rudgersj@unm.edu,http://orcid.org/0000-0001-7094-4857
+role,givenName,surName,organizationName,electronicMailAddress,userid
+Owner,Douglas,Moore,University of New Mexico,dmoore@sevilleta.unm.edu,
+Author,Jennifer,Rudgers,University of New Mexico,rudgersj@unm.edu,orcid.org/0000-0001-7094-4857
+Author,Anny,Chung,University of New Mexico,yyachung@unm.edu,
+Contact,Jennifer,Rudgers,University of New Mexico,rudgersj@unm.edu,orcid.org/0000-0001-7094-4857
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
